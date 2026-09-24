@@ -63,10 +63,10 @@ cd "C:/Users/Radhe/Music/Hackthon project"
 git init -q 2>/dev/null || true
 
 # The enclosing repo is configured as "Hermes Backup <hermes@backup.local>".
-# Without this, every commit in the submission carries that author. Set the
-# real identity at repository scope so the home config is untouched.
-git config user.name  "<your name>"
-git config user.email "<your GitHub email>"
+# Without this, every commit in the submission carries that author. Already
+# applied at repository scope so the home config is untouched.
+git config user.name "JNRCHAYAN"
+git config user.email "JNRCHAYAN@users.noreply.github.com"
 
 cat > requirements.txt <<'EOF'
 fastapi>=0.115,<1.0
@@ -3644,7 +3644,7 @@ python -m pip freeze | grep -iE "^(fastapi|uvicorn|httpx|pytest)==" > requiremen
 # render.yaml
 services:
   - type: web
-    name: super-agent-liquidity
+    name: project-hackthon
     runtime: python
     plan: free
     region: singapore
@@ -3673,21 +3673,29 @@ cd "C:/Users/Radhe/Music/Hackthon project"
 git add -A && git commit -m "feat: Render deployment configuration and health probe"
 ```
 
-The GitHub CLI is **not installed** on this machine (verified), so create the remote by hand:
+The remote is already configured and the initial commit pushed:
 
-1. Open <https://github.com/new>
-2. Name: `super-agent-liquidity` — **Public** — do **not** initialise with a README or .gitignore
-3. Copy the HTTPS URL it displays
-
-```bash
-git remote add origin https://github.com/<your-username>/super-agent-liquidity.git
-git branch -M main
-git push -u origin main
+```
+origin  https://github.com/JNRCHAYAN/project_hackthon.git
 ```
 
-Push will prompt for credentials. GitHub no longer accepts account passwords over HTTPS — use a
-personal access token (Settings → Developer settings → Tokens), or run `gh auth login` if you
-install the CLI later.
+**Use HTTPS, not SSH.** Verified constraints on this machine:
+
+- `~/.ssh` contains only a `config` file — there is **no private key**, so GitHub rejects SSH
+  with `Permission denied (publickey)`.
+- Port 22 is blocked on this network (`Connection timed out`); `ssh.github.com:443` connects but
+  still fails auth without a key.
+- Git Credential Manager **is** installed with cached credentials for `JNRCHAYAN`, so HTTPS
+  pushes require no further prompting.
+- The `github-hermes-backup` alias in `~/.ssh/config` points at `~/.ssh/hermes-backup`, a key
+  that does not exist. It is stale — ignore it.
+
+If you want SSH later, generate and register a key first:
+
+```bash
+ssh-keygen -t ed25519 -C "JNRCHAYAN@users.noreply.github.com"
+cat ~/.ssh/id_ed25519.pub     # paste at github.com/settings/keys
+```
 
 Then in the Render dashboard:
 
