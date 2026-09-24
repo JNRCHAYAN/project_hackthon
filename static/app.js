@@ -128,7 +128,9 @@
       actionRecorded: 'কার্যক্রম নথিভুক্ত হয়েছে',
       actionFailed: 'কার্যক্রম ব্যর্থ হয়েছে',
       srcTemplate: 'টেমপ্লেট থেকে (এলএলএম ব্যবহার হয়নি)',
-      srcLlm: 'এলএলএম-সংশোধিত, ক্যাশ করা',
+      srcLlm: 'এলএলএম-সংশোধিত',
+      srcLlmCached: 'এলএলএম-সংশোধিত, ক্যাশ করা',
+      srcLlmPartial: 'আংশিক এলএলএম-সংশোধিত (বাকিটা টেমপ্লেট)',
 
       kvOutlet: 'আউটলেট',
       kvProvider: 'প্রদানকারী',
@@ -353,7 +355,9 @@
       actionRecorded: 'Action recorded',
       actionFailed: 'Action failed',
       srcTemplate: 'from template (LLM layer not used)',
-      srcLlm: 'LLM-rephrased, cached',
+      srcLlm: 'LLM-rephrased',
+      srcLlmCached: 'LLM-rephrased, cached',
+      srcLlmPartial: 'partly LLM-rephrased (rest from template)',
 
       kvOutlet: 'Outlet',
       kvProvider: 'Provider',
@@ -701,6 +705,24 @@
     if (status === 'conflicting') return t('feedConflicting');
     if (status === 'missing') return t('feedMissing');
     return String(status || t('unknown'));
+  }
+
+  /* How much of this alert's prose the LLM actually wrote.
+     This used to be an inline `=== 'llm-cached'` test falling through to the
+     template label, which meant the *common* case — a narrative the model had
+     just rephrased — was displayed as "from template (LLM layer not used)".
+     The label that exists to tell a reviewer whether a model touched the text
+     was reporting the exact opposite of the truth, and the two branches were
+     swapped rather than merely imprecise.
+
+     Unknown values fall back to the template label. That is the safe direction
+     to be wrong in: it can only under-claim model authorship, never invent it. */
+  function sourceLabel(source) {
+    var s = String(source || '');
+    if (s === 'llm') return t('srcLlm');
+    if (s === 'llm-cached') return t('srcLlmCached');
+    if (s === 'llm-partial' || s === 'llm-cached-partial') return t('srcLlmPartial');
+    return t('srcTemplate');
   }
 
   function ctxLabel(ctx) {
@@ -1060,8 +1082,7 @@
       + kv(t('kvAssignee'), alert.assignee || t('unknown'))
       + kv(t('kvConfidence'), fRatio(alert.confidence))
       + kv(t('kvCreated'), fTime(alert.created_at))
-      + kv(t('kvSource'), alert.narrative_source === 'llm-cached'
-          ? t('srcLlm') : t('srcTemplate'))
+      + kv(t('kvSource'), sourceLabel(alert.narrative_source))
       + (CLS_TAG[alert.classification]
           ? '<span class="kv">' + esc(t('kvKind')) + ': '
             + tag(CLS_TAG[alert.classification], clsLabel(alert.classification))

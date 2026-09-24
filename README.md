@@ -104,6 +104,13 @@ python -m pip install -r requirements.txt
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
+If port 8000 is already taken — Docker Desktop binds it on some machines — pick
+another without editing anything:
+
+```bash
+PORT=8123 ./run.sh
+```
+
 ## Test
 
 ```bash

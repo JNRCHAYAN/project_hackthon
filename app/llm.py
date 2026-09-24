@@ -13,6 +13,12 @@ The safety property is enforced by construction, not by prompting:
 So even a fully hallucinating model cannot move a ৳ figure. It can only make the
 sentence describing that figure read better.
 
+The narrative's ``source`` field reports which of those happened, and how much of
+what the reader is looking at the model actually wrote: ``template``, ``llm``,
+``llm-partial`` (some fields survived validation, some did not), and the
+``-cached`` variants of the last two. See ``_source_name`` for why the partial
+case is not simply folded into ``llm``.
+
 Everything here is best-effort: if the token is unset, the network is down, the
 call is slow, or the model misbehaves, the deterministic template narrative —
 which is complete on its own — is returned unchanged.
@@ -98,6 +104,25 @@ def _safe(text: str, lang: str) -> bool:
     return True
 
 
+def _source_name(accepted: dict, cached: bool) -> str:
+    """Name how much of this narrative the model actually wrote.
+
+    ``llm`` is only honest when the model supplied *every* field it was asked
+    for. Fields are validated independently, so a response can be half
+    accepted — and a reader shown "LLM-rephrased" over a block that is half
+    template prose is being told something untrue about the text in front of
+    them. That is the same class of overstatement the source row exists to
+    prevent, so the mixed case gets its own name rather than being rounded up.
+
+    The value is also read by ``static/app.js``, which renders it beside every
+    alert; unknown values there fall back to the template label, which is the
+    safe direction to be wrong in.
+    """
+    stem = "llm-cached" if cached else "llm"
+    complete = len(accepted) >= len(REWRITABLE)
+    return stem if complete else f"{stem}-partial"
+
+
 def rephrase(narrative: Narrative, lang: str = "bn") -> Narrative:
     """Return a narrative with its prose improved, or the original untouched."""
     if not llm_available():
@@ -106,7 +131,7 @@ def rephrase(narrative: Narrative, lang: str = "bn") -> Narrative:
     key = _cache_key(f"{lang}|{narrative.situation}|{narrative.uncertainty}")
     cached = _read_cache(key)
     if cached:
-        return _merge(narrative, cached, source="llm-cached")
+        return _merge(narrative, cached, source=_source_name(cached, cached=True))
 
     body = {
         "model": SETTINGS["llm_model"],
@@ -161,7 +186,8 @@ def rephrase(narrative: Narrative, lang: str = "bn") -> Narrative:
         return narrative
 
     _write_cache(key, accepted)
-    return _merge(narrative, accepted, source="llm")
+    return _merge(narrative, accepted,
+                  source=_source_name(accepted, cached=False))
 
 
 def _merge(narrative: Narrative, accepted: dict, source: str) -> Narrative:

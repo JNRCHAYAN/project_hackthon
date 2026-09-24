@@ -246,6 +246,85 @@ def test_a_rejected_field_does_not_drag_a_safe_field_down_with_it(net):
     assert result.uncertainty == "An estimate, not a fact."   # accepted
 
 
+def test_a_half_accepted_answer_is_not_labelled_fully_model_written(net):
+    """The source field must not round a partial success up to a full one.
+
+    Fields validate independently, so a response can be half accepted. Saying
+    "LLM-rephrased" over a block that is half template prose misdescribes the
+    text in front of the reader — the same overstatement the source row exists
+    to prevent, and the reason this is not folded into plain ``llm``.
+    """
+    narrative = _narrative()
+    net.answer(situation="fraud detected", uncertainty="An estimate, not a fact.")
+
+    result = rephrase(narrative, "en")
+
+    assert result.source == "llm-partial"
+    assert result.situation == narrative.situation
+    assert result.uncertainty == "An estimate, not a fact."
+
+
+def test_a_fully_accepted_answer_is_still_labelled_llm(net):
+    """The partial label must not leak onto the complete case."""
+    net.answer(situation="A clean rewrite.", uncertainty="Another clean rewrite.")
+    assert rephrase(_narrative(), "en").source == "llm"
+
+
+def test_the_partial_label_survives_the_cache(net):
+    """A cached partial answer is still partial, and must say so on the way out.
+
+    Only the accepted fields are stored, so the label is re-derived from what
+    the cache file actually contains rather than remembered — which is what
+    keeps a partial entry from reading as a complete one on the second load.
+    """
+    narrative = _narrative()
+    net.answer(situation="fraud detected", uncertainty="An estimate, not a fact.")
+    first = rephrase(narrative, "en")
+    assert first.source == "llm-partial"
+
+    net.response = httpx.ConnectError("the network must not be touched")
+    second = rephrase(narrative, "en")
+
+    assert net.calls == 1, "a cache hit made an HTTP request"
+    assert second.source == "llm-cached-partial"
+    assert second.situation == narrative.situation
+    assert second.uncertainty == "An estimate, not a fact."
+
+
+def test_a_complete_answer_stays_complete_through_the_cache(net):
+    narrative = _narrative()
+    net.answer(situation="Clean.", uncertainty="Also clean.")
+    rephrase(narrative, "en")
+    net.response = httpx.ConnectError("the network must not be touched")
+
+    assert rephrase(narrative, "en").source == "llm-cached"
+
+
+def test_the_four_outcomes_produce_four_distinct_names(net):
+    """Each outcome is named, and no two collapse into one.
+
+    The dashboard picks its label straight off this string, so two outcomes
+    sharing a name would be two outcomes sharing a label — which is exactly how
+    the partial case stayed hidden behind "LLM-rephrased" before.
+    """
+    clean = _narrative()                       # both fields acceptable
+    mixed = Narrative(situation="A different situation.", evidence=[],
+                      uncertainty="A different uncertainty.", next_steps=[],
+                      rejected_text="", source="template")
+
+    net.answer(situation="Clean rewrite.", uncertainty="Clean uncertainty.")
+    assert rephrase(clean, "en").source == "llm"
+
+    net.response = httpx.ConnectError("the network must not be touched")
+    assert rephrase(clean, "en").source == "llm-cached"
+
+    net.answer(situation="fraud detected", uncertainty="Kept anyway.")
+    assert rephrase(mixed, "en").source == "llm-partial"
+
+    net.response = httpx.ConnectError("the network must not be touched")
+    assert rephrase(mixed, "en").source == "llm-cached-partial"
+
+
 @pytest.mark.parametrize("bad", [
     "Exhausted in 3 hours.",
     "Balance is ৳6,200.",
