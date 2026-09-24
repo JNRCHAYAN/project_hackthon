@@ -148,11 +148,18 @@ class Simulator:
         self._episodes = []
         world: dict[str, OutletState] = {}
 
+        # How many outlets this area has already placed. The first outlet in an
+        # area sits exactly on the area's centroid — it is the thana's own
+        # outlet — and any further ones sit around it.
+        placed: dict[str, int] = {}
         for i in range(self.outlets):
             area, thana, district, lat, lon = AREAS[i % len(AREAS)]
+            nth = placed.get(area, 0)
+            placed[area] = nth + 1
+            dlat, dlon = self._offset(self.seed, nth)
             outlet = Outlet(id=f"AG-{1000 + i}", name=f"Outlet {1000 + i}",
                             area=area, thana=thana, district=district,
-                            lat=lat, lon=lon)
+                            lat=lat + dlat, lon=lon + dlon)
             world[outlet.id] = self._build_outlet(outlet, rng)
 
         self._inject_episodes(world)
@@ -162,6 +169,29 @@ class Simulator:
                 (t for t in state.transactions if t.ts <= self.now),
                 key=lambda t: t.ts)
         return world
+
+    @staticmethod
+    def _offset(seed: int, nth: int) -> tuple[float, float]:
+        """Where the nth extra outlet in an area sits, relative to its centroid.
+
+        Outlets were assigned coordinates by ``AREAS[i % len(AREAS)]``, so every
+        outlet in an area shared one point: a 12-outlet network mapped to four
+        dots, the map could not show which outlet was at risk, and the whole
+        "nearest surplus outlet" feature measured every same-area distance as
+        zero. Successive outlets now walk a golden-angle spiral, which spreads
+        them evenly in every direction rather than fanning them out on one side.
+
+        Derived from the seed and the index alone rather than drawn from the
+        shared ``rng``: taking draws here would shift every downstream seeded
+        value — opening balances, transaction streams, planted episodes — and
+        silently rewrite what the seeded tests are asserting.
+        """
+        if nth <= 0:
+            return 0.0, 0.0
+        angle = nth * 2.399963229728653          # golden angle, radians
+        radius = 0.0135 * math.sqrt(nth)         # ~1.5 km, growing as it fills
+        phase = (seed % 360) * math.pi / 180.0   # keeps two seeds from coinciding
+        return radius * math.cos(angle + phase), radius * math.sin(angle + phase)
 
     # -- baseline generation ------------------------------------------------
     def _demand(self, ts: float) -> float:

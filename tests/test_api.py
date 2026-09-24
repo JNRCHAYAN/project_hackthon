@@ -25,31 +25,9 @@ SEED = 1
 OUTLETS = 4
 
 
-@pytest.fixture(scope="module")
-def client(tmp_path_factory):
-    """The real app, wired to an engine that cannot reach the network.
-
-    The dashboard's engine narrates through the LLM layer by default, and this
-    environment has a token set: without this fixture a suite run would make
-    live HTTP calls, one narrative at a time. The stub here is the engine's own
-    ``use_llm=False`` switch plus an unset token, which leaves the deterministic
-    template narratives — the same text the app falls back to in production.
-    """
-    patch = MonkeyPatch()
-    patch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
-
-    from app import main
-
-    scratch = tmp_path_factory.mktemp("api")
-    previous = main._engine
-    main._engine = Engine(seed=42, outlets=12, use_llm=False,
-                          db_path=scratch / "audit.sqlite")
-    try:
-        with TestClient(app) as test_client:
-            yield test_client
-    finally:
-        main._engine = previous
-        patch.undo()
+# The ``client`` fixture lives in conftest.py: more than one module drives the
+# real app now, and the two protections it carries — no live LLM calls and a
+# scratch audit database — should not have to be repeated per module.
 
 
 def _world(client, scenario="baseline", seed=SEED, outlets=OUTLETS):
@@ -218,6 +196,63 @@ def test_a_note_leaves_the_status_alone(client):
     assert response.json()["status"] == before
 
 
+@pytest.mark.parametrize("payload", [
+    {"action": "note"},
+    {"action": "note", "note": ""},
+    {"action": "note", "note": "   "},
+])
+def test_a_note_without_a_note_is_refused(client, payload):
+    """A note with no text appends a meaningless row to an append-only trail.
+
+    The dashboard already blocks this before it sends anything, but the
+    dashboard is not the only caller, and the row cannot be withdrawn once it
+    is in the trail.
+    """
+    alert = _alert(client)
+    before = client.get(f"/api/cases?alert_id={alert['id']}").json()
+
+    response = client.post(f"/api/alerts/{alert['id']}/action", json=payload)
+
+    assert response.status_code == 422
+    assert "note" in response.json()["detail"]
+    after = client.get(f"/api/cases?alert_id={alert['id']}").json()
+    assert len(after) == len(before), "a refused note still wrote to the trail"
+
+
+def test_acting_on_a_resolved_case_reports_itself_as_a_reopen(client):
+    """A case that goes backwards must say so, not just report "recorded".
+
+    Reopening stays legal — resolving by mistake has to be correctable, and
+    there is no separate reopen verb — but the caller has to be able to tell it
+    apart from an ordinary action. It could not before: the status simply moved
+    and the response looked exactly like any other.
+    """
+    alert = _alert(client)
+    client.post(f"/api/alerts/{alert['id']}/action",
+                json={"action": "resolve", "actor": "ops_1"})
+    assert client.get(f"/api/alerts/{alert['id']}").json()["status"] == "resolved"
+
+    reopened = client.post(f"/api/alerts/{alert['id']}/action",
+                           json={"action": "acknowledge", "actor": "ops_1"})
+
+    assert reopened.status_code == 200
+    assert reopened.json()["status"] == "acknowledged"
+    assert reopened.json().get("reopened") is True
+
+
+def test_an_ordinary_action_is_not_flagged_as_a_reopen(client):
+    """The flag must mean a reopen, not merely a status change."""
+    alert = _alert(client, provider_id="bkash", kind="data_quality")
+    client.post(f"/api/alerts/{alert['id']}/action",
+                json={"action": "acknowledge", "actor": "ops_1"})
+
+    response = client.post(f"/api/alerts/{alert['id']}/action",
+                           json={"action": "escalate", "actor": "ops_1"})
+
+    assert response.status_code == 200
+    assert response.json().get("reopened") is None
+
+
 def test_an_action_is_written_to_the_audit_trail(client):
     alert = _alert(client)
     client.post(f"/api/alerts/{alert['id']}/action",
@@ -297,9 +332,13 @@ def test_an_oversight_role_acts_within_the_owning_track(client):
     """Central operations handle a nagad alert inside the nagad track."""
     alert = _alert(client, provider_id="nagad")
     for oversight in ("central", "oversight", "risk_analyst"):
+        # A note is used here because it is the one verb that leaves the status
+        # where it is. It carries a note because a note action without one is
+        # refused: the row it would append says nothing.
         response = client.post(f"/api/alerts/{alert['id']}/action",
                                json={"action": "note", "actor": oversight,
-                                     "actor_provider": oversight})
+                                     "actor_provider": oversight,
+                                     "note": f"handled by {oversight}"})
         assert response.status_code == 200, oversight
 
 
@@ -332,6 +371,58 @@ def test_a_malformed_simulate_payload_is_rejected_with_422(client, payload):
 def test_the_outlet_count_is_clamped_to_a_usable_range(client):
     assert len(_world(client, outlets=500)["outlets"]) == 60
     assert len(_world(client, outlets=0)["outlets"]) == 1
+
+
+@pytest.mark.parametrize("payload", [
+    {"outlets": 12.7},
+    {"outlets": 0.5},
+    {"seed": 3.25},
+])
+def test_a_fractional_count_is_refused_rather_than_truncated(client, payload):
+    """A number that is not whole must not be quietly rounded to a different one.
+
+    ``int(12.7)`` is 12, so these were answered with a world of 12 outlets while
+    the caller had asked for something the API never acknowledged changing.
+    """
+    assert client.post("/api/simulate", json=payload).status_code == 422
+
+
+@pytest.mark.parametrize("body", [
+    '{"outlets": 1e400}',      # JSON number syntax for a value too large for a float
+    '{"outlets": Infinity}',   # json.loads accepts this constant; strict JSON does not
+    '{"outlets": NaN}',
+])
+def test_a_non_finite_count_is_refused_rather_than_crashing(client, body):
+    """These parsed to infinity and ``int(inf)`` raised ``OverflowError``, a
+    subclass of neither ``TypeError`` nor ``ValueError``, so the request
+    answered 500 — blaming the server for the client's malformed number.
+
+    They are sent as raw bodies because Python's own JSON encoder refuses to
+    write ``inf`` or ``nan``, so ``json=`` cannot express the very payloads that
+    used to break this. A client is under no such obligation.
+    """
+    response = client.post("/api/simulate", content=body,
+                           headers={"Content-Type": "application/json"})
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("payload", [
+    {"outlets": 12.0},
+    {"seed": 7.0},
+])
+def test_a_whole_float_is_accepted(client, payload):
+    """JSON does not oblige an encoder to write 12 rather than 12.0.
+
+    A client that reached the number by arithmetic may send either spelling, and
+    the two name the same quantity, so refusing this would reject an honest
+    request over punctuation.
+    """
+    assert client.post("/api/simulate", json=payload).status_code == 200
+
+
+def test_a_bool_is_not_an_outlet_count(client):
+    """``bool`` is an ``int`` subclass, so ``True`` would otherwise mean one outlet."""
+    assert client.post("/api/simulate", json={"outlets": True}).status_code == 422
 
 
 def test_a_demand_what_if_rebuilds_the_world(client):

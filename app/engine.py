@@ -23,7 +23,7 @@ from app import hotspot, network
 from app.anomaly import account_concentration
 from app.anomaly import scan as scan_anomalies
 from app.config import SETTINGS
-from app.context import calendar_context, classify
+from app.context import bn_num, calendar_context, classify
 from app.coordination import AuditLog, open_case, route
 from app.domain import (Alert, AlertKind, CaseStatus, Classification, FeedStatus,
                         Severity)
@@ -290,6 +290,8 @@ class Engine:
             alert.feed_withdrawn = True
             alert.reason = ("feed data cannot be trusted; projection withdrawn "
                             "rather than estimated")
+            alert.reason_bn = ("ফিডের তথ্য নির্ভরযোগ্য নয়; অনুমান না করে "
+                               "পূর্বাভাস স্থগিত রাখা হয়েছে")
         else:
             sev = liquid_severity(proj)
             alert.severity = (sev or Severity.LOW).value
@@ -297,9 +299,13 @@ class Engine:
             alert.classification = Classification.NORMAL
             if proj.exhausted:
                 alert.reason = "balance is already depleted"
+                alert.reason_bn = "ব্যালেন্স ইতিমধ্যে শেষ হয়ে গেছে"
             else:
                 alert.reason = (f"projected to run out in "
                                 f"{format_hours(proj.hours_to_empty, 'en')}")
+                alert.reason_bn = (f"আনুমানিক "
+                                   f"{format_hours(proj.hours_to_empty, 'bn')} "
+                                   f"ঘণ্টার মধ্যে শেষ হয়ে যেতে পারে")
 
         self._apply_narratives(alert, *self._liquidity_narratives(proj, pid,
                                                                   suppressed))
@@ -343,6 +349,9 @@ class Engine:
         alert.confidence = round(proj.confidence, 2)
         alert.reason = (f"shared cash projected to run out in "
                         f"{format_hours(proj.hours_to_empty, 'en')}")
+        alert.reason_bn = (f"শেয়ার্ড নগদ আনুমানিক "
+                           f"{format_hours(proj.hours_to_empty, 'bn')} ঘণ্টার "
+                           f"মধ্যে শেষ হয়ে যেতে পারে")
         self._apply_narratives(alert, *self._cash_narratives(state, proj))
         open_case(alert, now, self._cases.get(alert.id))
         self.alerts[alert.id] = alert
@@ -392,6 +401,11 @@ class Engine:
         alert.severity = verdict.priority
         alert.confidence = verdict.confidence
         alert.reason = verdict.accepted
+        # The verdict is computed in both languages, so the Bengali triage line
+        # is taken from it rather than written again here. The two can then only
+        # disagree by the verdict changing, which is the same source of truth the
+        # narrative is built from.
+        alert.reason_bn = verdict.accepted_bn
         alert.rejected_hypotheses = list(verdict.rejected_hypotheses)
         alert.evidence = list(sig.evidence)
 
@@ -495,6 +509,8 @@ class Engine:
             alert.confidence = 0.8
             alert.reason = (f"{len(pressed)} outlets in {area} are projected to "
                             f"run short within the alert horizon")
+            alert.reason_bn = (f"{area} এলাকার {bn_num(len(pressed))}টি শাখায় "
+                               f"নির্ধারিত সময়ের মধ্যে ঘাটতির আশঙ্কা")
             names = ", ".join(r["name"] for r in pressed)
             n_bn = assemble_coordination(
                 f"{area} এলাকার {len(pressed)}টি শাখায় ঘাটতির আশঙ্কা: {names}",
@@ -722,6 +738,10 @@ class Engine:
             "severity": a.severity,
             "confidence": a.confidence,
             "reason": a.reason,
+            # Sent beside the English rather than instead of it: the dashboard
+            # switches language without re-fetching, so both have to be present
+            # in one payload for the switch to be instant.
+            "reason_bn": a.reason_bn,
             "classification": a.classification.value,
             "evidence": a.evidence,
             "uncertainty": a.uncertainty,
@@ -765,12 +785,21 @@ class Engine:
         if actor_provider in self.CROSS_TRACK_ACTORS:
             actor_provider = alert.provider_id
 
+        was_resolved = alert.status is CaseStatus.RESOLVED
         now = self.snapshot.get("generated_at", time.time())
         alert = transition(alert, action, actor, note, now,
                            actor_provider=actor_provider, log=self.audit)
         self._cases[alert_id] = (alert.status, alert.owner, alert.assignee)
         self._publish_case(alert)
-        return self._alert_payload(alert)
+        payload = self._alert_payload(alert)
+        # Acting on a resolved case moves it backwards, which is legal — an
+        # operator who resolved one by mistake has to be able to correct it and
+        # there is no separate reopen verb — but it must not be invisible. The
+        # response says so, so any caller can tell a reopen from an ordinary
+        # action instead of being told merely that an action was recorded.
+        if was_resolved and alert.status is not CaseStatus.RESOLVED:
+            payload["reopened"] = True
+        return payload
 
     def _publish_case(self, alert: Alert) -> None:
         """Write a case action back into the snapshot the API serves.

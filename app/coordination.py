@@ -176,14 +176,29 @@ def open_case(alert: Alert, now: float,
 def transition(alert: Alert, action: str, actor: str, note: str, now: float,
                actor_provider: str | None,
                log: "AuditLog | None" = None) -> Alert:
-    """Apply an action to a case, enforcing the two guardrails.
+    """Apply an action to a case, enforcing the guardrails.
 
     Raises ``ValueError`` for an action outside ``VALID_ACTIONS`` (before any
     permission check, so an invalid action never leaks a boundary verdict) and
-    ``PermissionError`` for a cross-provider action.
+    for a note action that carries no note, and ``PermissionError`` for a
+    cross-provider action.
+
+    A status-changing action on a resolved case is allowed rather than refused:
+    an operator who resolved a case by mistake must be able to correct it, and
+    this vocabulary has no separate "reopen" verb, so refusing would leave the
+    case stuck. It is instead reported to the caller as a reopen — see
+    ``Engine.act``. Leaving it silent is what made it a defect: the case moved
+    backwards and the operator was told only that an action was recorded.
     """
     if action not in VALID_ACTIONS:
         raise ValueError(f"unsupported action: {action!r}")
+
+    # A note is the one action whose entire content is its text, so an empty
+    # one writes a row into an append-only trail that says nothing and cannot
+    # be withdrawn. The dashboard already refuses this; the API must too,
+    # because the dashboard is not the only caller.
+    if action == "note" and not (note or "").strip():
+        raise ValueError("a note action requires a note")
 
     if not provider_boundary_ok(alert.provider_id, actor_provider):
         raise PermissionError(

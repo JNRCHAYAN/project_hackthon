@@ -136,6 +136,13 @@ class Alert:
     severity: str
     confidence: float
     reason: str
+    # The same one-line reason in Bengali. The queue prints this string as each
+    # alert's triage line, and the dashboard is Bengali by default, so a reason
+    # with no Bengali twin showed an English sentence in the middle of the
+    # queue. Everything else on the alert already carries both languages —
+    # narrative_bn/en and parts_bn/en — so this is the field that was missing
+    # rather than a new idea.
+    reason_bn: str = ""
     evidence: list[str] = field(default_factory=list)
     uncertainty: str = ""
     classification: Classification = Classification.NORMAL

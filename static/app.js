@@ -50,6 +50,42 @@
       whatif: 'কী-হলে',
       audit: 'কেস ইতিহাস',
       appendOnly: 'শুধু সংযোজন',
+      /* The static markup's own text and labels. These live in index.html as
+         English defaults so the page reads correctly before the script runs, and
+         are replaced here on load; the aria ones reach a screen reader only, which
+         is why they were the last English left in a Bengali page. */
+      skipToMain: 'মূল বিষয়বস্তুতে যান',
+      taglineLead: 'এজেন্ট নেটওয়ার্ক · বাংলাদেশ',
+      taglineSynthetic: 'কৃত্রিম ডেটা',
+      ariaViewControls: 'ভিউ নিয়ন্ত্রণ',
+      ariaSections: 'বিভাগসমূহ',
+      ariaNetworkSummary: 'নেটওয়ার্ক সারসংক্ষেপ',
+      ariaLegend: 'নির্দেশিকা',
+      ariaAlertDetail: 'সতর্কবার্তার বিস্তারিত',
+      exportHint: 'সম্পূর্ণ প্রমাণ-সংকলন JSON হিসেবে ডাউনলোড করুন',
+
+      /* section navigation */
+      navOverview: 'সারসংক্ষেপ',
+      navAlerts: 'সতর্কতা',
+      navRunways: 'রানওয়ে',
+      navCoverage: 'কভারেজ',
+      navNetwork: 'সম্পর্ক',
+      navWhatif: 'কী-হলে',
+      navHistory: 'ইতিহাস',
+
+      /* scenario picker */
+      scenarioLabel: 'দৃশ্যপট',
+      scBaseline: 'বেসলাইন নেটওয়ার্ক',
+      scA: 'A — প্রদানকারীর তারল্য',
+      scB: 'B — পর্যালোচনা প্রয়োজন',
+      scB2: 'B2 — চাহিদার ঢেউ',
+      scC: 'C — ডেটার গুণমান',
+
+      /* appearance */
+      themeName: 'থিম',
+      themeToDark: 'গাঢ় থিমে যান',
+      themeToLight: 'হালকা থিমে যান',
+
       footnote: 'শুধুমাত্র পরামর্শমূলক। এখানকার কিছুই কোনো ব্যক্তির বিরুদ্ধে '
         + 'সিদ্ধান্ত দেয় না, কোনো লেনদেন আটকায় না, বা প্রদানকারীদের মধ্যে '
         + 'অর্থ স্থানান্তর করে না। প্রতিটি সংখ্যা একটি সিড-ভিত্তিক সিমুলেশন '
@@ -126,6 +162,7 @@
       noHistory: 'এখনো কোনো ব্যবস্থা নথিভুক্ত হয়নি।',
       boundaryHead: 'প্রদানকারী সীমা অতিক্রম করা যায়নি।',
       actionRecorded: 'কার্যক্রম নথিভুক্ত হয়েছে',
+      caseReopened: 'নিষ্পত্তি হওয়া কেসটি পুনরায় খোলা হয়েছে',
       actionFailed: 'কার্যক্রম ব্যর্থ হয়েছে',
       srcTemplate: 'টেমপ্লেট থেকে (এলএলএম ব্যবহার হয়নি)',
       srcLlm: 'এলএলএম-সংশোধিত',
@@ -144,6 +181,7 @@
 
       /* outlets / runways */
       oTotal: 'মোট মূল্য',
+      oFocus: 'এই আউটলেট খুলুন',
       oTxns: 'লেনদেন',
       oReliability: 'নির্ভরযোগ্যতা',
       oAxis: 'রানওয়ে অক্ষ: এখন → ৬ ঘণ্টা',
@@ -214,6 +252,7 @@
         + 'নেটওয়ার্কটি আবার গণনা হয়।',
       wiEmpty: 'সিমুলেশন নিয়ন্ত্রণ পাওয়া যায়নি।',
       wiRerun: 'নতুন করে গণনা করা হচ্ছে…',
+      runBusy: 'আরেকটি কাজ এখনো চলছে — শেষ হলে আবার চেষ্টা করুন',
 
       /* metrics */
       metricsEmpty: 'কোনো পরিমাপ পাওয়া যায়নি।',
@@ -234,11 +273,15 @@
       auditEmptyBody: 'এখনো কোনো কেস কার্যক্রম নথিভুক্ত হয়নি।',
       auditTruncated: 'সর্বশেষ {shown}টি দেখানো হচ্ছে (মোট {total}টি) — পূর্ণ '
         + 'ইতিহাস /api/cases-এ আছে।',
+      auditClockNote: 'সময়গুলো অনুকরণকৃত বিশ্ব-ঘড়ির, যা এই ড্যাশবোর্ড খোলা '
+        + 'থাকা অবস্থায় এগোয় না — তাই কয়েকটি ব্যবস্থার সময় একই দেখাতে পারে। '
+        + 'সারিগুলো নথিভুক্ত হওয়ার ক্রমেই সাজানো।',
 
       /* misc */
       unknown: 'অজানা',
       notProjected: 'পূর্বাভাস নেই',
       loadFailed: 'ডেটা লোড করা যায়নি',
+      casesLoadFailed: 'কেস ইতিহাস লোড করা যায়নি',
       retry: 'আবার চেষ্টা করুন',
       queueLabel: 'সতর্কতার তালিকা — তীর চিহ্ন দিয়ে চলুন',
       langChanged: 'ভাষা: বাংলা',
@@ -263,7 +306,7 @@
       roleAgent: 'এজেন্ট',
       roleFieldOfficer: 'ফিল্ড অফিসার',
       roleAreaManager: 'এরিয়া ম্যানেজার',
-      roleCentralOps: 'কেন্দ্রীয় অপারেশনস',
+      roleCentralOperations: 'কেন্দ্রীয় অপারেশনস',
       roleRiskAnalyst: 'ঝুঁকি বিশ্লেষক',
       ctxOrdinary: 'সাধারণ দিন',
       ctxEid: 'ঈদ',
@@ -282,6 +325,35 @@
       whatif: 'What-if',
       audit: 'Case history',
       appendOnly: 'append-only',
+      skipToMain: 'Skip to main content',
+      taglineLead: 'Agent network · Bangladesh',
+      taglineSynthetic: 'synthetic data',
+      ariaViewControls: 'View controls',
+      ariaSections: 'Sections',
+      ariaNetworkSummary: 'Network summary',
+      ariaLegend: 'Legend',
+      ariaAlertDetail: 'Alert detail',
+      exportHint: 'Download the full evidence pack as JSON',
+
+      navOverview: 'Overview',
+      navAlerts: 'Alerts',
+      navRunways: 'Runways',
+      navCoverage: 'Coverage',
+      navNetwork: 'Relationships',
+      navWhatif: 'What-if',
+      navHistory: 'History',
+
+      scenarioLabel: 'Scenario',
+      scBaseline: 'Baseline network',
+      scA: 'A — provider liquidity',
+      scB: 'B — needs review',
+      scB2: 'B2 — demand spike',
+      scC: 'C — data quality',
+
+      themeName: 'Theme',
+      themeToDark: 'Switch to dark theme',
+      themeToLight: 'Switch to light theme',
+
       footnote: 'Advisory only. Nothing here determines wrongdoing, blocks a '
         + 'transaction, or moves value between providers. Every figure is '
         + 'computed from a seeded simulation; no real balances or identities '
@@ -353,6 +425,7 @@
       noHistory: 'No action recorded yet.',
       boundaryHead: 'Provider boundary not crossed.',
       actionRecorded: 'Action recorded',
+      caseReopened: 'Reopened a resolved case',
       actionFailed: 'Action failed',
       srcTemplate: 'from template (LLM layer not used)',
       srcLlm: 'LLM-rephrased',
@@ -370,6 +443,7 @@
       kvSource: 'Narrative source',
 
       oTotal: 'total value',
+      oFocus: 'Open this outlet',
       oTxns: 'transactions',
       oReliability: 'Reliability',
       oAxis: 'Runway axis: now to 6 hours',
@@ -435,6 +509,7 @@
         + 'recomputed, not just re-drawn.',
       wiEmpty: 'Simulation controls unavailable.',
       wiRerun: 'recomputing…',
+      runBusy: 'Another operation is still in progress — try again when it finishes',
 
       metricsEmpty: 'No measurements available.',
       mEpisodes: 'Ground-truth episodes',
@@ -453,10 +528,14 @@
       auditEmptyBody: 'No case action has been logged.',
       auditTruncated: 'Showing the most recent {shown} of {total} — the full '
         + 'trail is at /api/cases.',
+      auditClockNote: 'Times are the simulated world clock, which does not '
+        + 'advance while this dashboard is open — so several actions can share '
+        + 'one timestamp. Rows are in the order they were recorded.',
 
       unknown: 'unknown',
       notProjected: 'not projected',
       loadFailed: 'Could not load the snapshot',
+      casesLoadFailed: 'Could not load the case history',
       retry: 'Try again',
       queueLabel: 'Alert queue — use the arrow keys to move',
       langChanged: 'Language: English',
@@ -481,7 +560,7 @@
       roleAgent: 'agent',
       roleFieldOfficer: 'field officer',
       roleAreaManager: 'area manager',
-      roleCentralOps: 'central operations',
+      roleCentralOperations: 'central operations',
       roleRiskAnalyst: 'risk analyst',
       ctxOrdinary: 'ordinary day',
       ctxEid: 'Eid',
@@ -648,44 +727,57 @@
       + esc(body) + '</div>';
   }
 
+  // The fatal state is the one place the dashboard has nothing to show, so it is
+  // also where a recovery path matters most. It used to be a bare message: the
+  // operator was told the snapshot could not be loaded and given nothing to do
+  // about it, while the "Try again" string that had been written for exactly this
+  // sat unused in the dictionary. The button re-runs the same refresh() that boot
+  // calls, so a server that has come back is picked up without a page reload.
+  //
+  // It carries no data-act, because doAction refuses to run without a selected
+  // case and this state may have no snapshot and no selection at all; the click is
+  // handled directly instead.
+  function fatalBlock(message, title) {
+    return '<div class="empty"><strong>' + esc(title || t('loadFailed'))
+      + '</strong>'
+      + (message ? esc(message) : '')
+      + '<div><button class="btn btn-act" type="button" id="fatal-retry">'
+      + svgIcon(ICON.run) + '<span>' + esc(t('retry')) + '</span></button></div>'
+      + '</div>';
+  }
+
   function tag(key, text) {
     return '<span class="tag ' + key + '">' + esc(text) + '</span>';
   }
 
-  function sevLabel(sev) {
-    return t('sev' + String(sev || '').charAt(0).toUpperCase()
-      + String(sev || '').slice(1));
+  // The five label builders below all turn a server value into a dictionary
+  // key — "data_quality" becomes kindDataQuality, "medium" becomes sevMedium —
+  // and they must all behave the same way when no such key exists. Returning
+  // t()'s own fallback would print the key, so a kind the dashboard had never
+  // heard of would reach an operator as "kindDemandSpike". They degrade to the
+  // raw value instead, which at least says what the server actually sent.
+  //
+  // This is one function rather than five near-copies because the copies are
+  // how three of them came to be missing the fallback the other two already
+  // had. A note on the outcome: if the current language lacks a key but English
+  // has it, t() returns the English string, which is not the key, so the
+  // translation wins and this never degrades over a mere missing translation.
+  function labelFrom(prefix, value, splitWords) {
+    var text = String(value == null ? '' : value);
+    var stem = splitWords
+      ? text.split('_').map(function (word) {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join('')
+      : text.charAt(0).toUpperCase() + text.slice(1);
+    var translated = t(prefix + stem);
+    return translated === prefix + stem ? text : translated;
   }
 
-  function kindLabel(kind) {
-    var key = 'kind' + String(kind || '').split('_').map(function (w) {
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join('');
-    return t(key);
-  }
-
-  function statusLabel(status) {
-    var key = 'st' + String(status || '').split('_').map(function (w) {
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join('');
-    return t(key);
-  }
-
-  function roleLabel(role) {
-    var key = 'role' + String(role || '').split('_').map(function (w) {
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join('');
-    var value = t(key);
-    return value === key ? String(role || '') : value;
-  }
-
-  function clsLabel(classification) {
-    var key = 'cls' + String(classification || '').split('_').map(function (w) {
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join('');
-    var value = t(key);
-    return value === key ? String(classification || '') : value;
-  }
+  function sevLabel(sev) { return labelFrom('sev', sev, false); }
+  function kindLabel(kind) { return labelFrom('kind', kind, true); }
+  function statusLabel(status) { return labelFrom('st', status, true); }
+  function roleLabel(role) { return labelFrom('role', role, true); }
+  function clsLabel(classification) { return labelFrom('cls', classification, true); }
 
   function providerName(pid, positions) {
     if (!pid) return t('trackShared');
@@ -771,14 +863,32 @@
   }
 
   var toastTimer = null;
+  var toastClearTimer = null;
   function toast(message, isError) {
     var node = $('#toast');
     if (!node) return;
-    node.textContent = message;
-    node.className = isError ? 'toast error show' : 'toast show';
     if (toastTimer) window.clearTimeout(toastTimer);
+    if (toastClearTimer) window.clearTimeout(toastClearTimer);
+    // Empty the region, then fill it on the next frame. A live region announces
+    // a *change* to its text, so setting the same string it already holds —
+    // pressing the same guarded control twice — produced no announcement at all
+    // the second time round.
+    node.textContent = '';
+    var paint = function () {
+      node.textContent = message;
+      node.className = isError ? 'toast error show' : 'toast show';
+    };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(paint);
+    else paint();
     toastTimer = window.setTimeout(function () {
       node.className = 'toast' + (isError ? ' error' : '');
+      // Emptied once the exit transition has run, not at the instant it starts,
+      // so the slide-out still has its text. A hidden node that keeps holding
+      // its message stays in the accessibility tree announcing something that
+      // stopped being true four seconds ago.
+      toastClearTimer = window.setTimeout(function () {
+        node.textContent = '';
+      }, 400);
     }, TOAST_MS);
   }
 
@@ -796,10 +906,136 @@
       toggle.setAttribute('aria-pressed', state.lang === 'bn' ? 'true' : 'false');
       toggle.setAttribute('title', t('langSwitchTitle'));
     }
+    // Attributes are not text, so a translated sentence in an aria-label or a
+    // title stayed English while the visible page switched to Bengali. That is the
+    // worst place for a wrong language to hide: it is inaudible on screen, and the
+    // people who meet it are the ones using a screen reader. An element opts in by
+    // naming what to fill — ``title:key``, or a bare key meaning title — so nothing
+    // is translated by guesswork and an untranslated attribute stays visible in
+    // review rather than being silently swapped.
+    var attrNodes = document.querySelectorAll('[data-i18n-attr]');
+    for (var j = 0; j < attrNodes.length; j++) {
+      var specs = attrNodes[j].getAttribute('data-i18n-attr').split(',');
+      for (var k = 0; k < specs.length; k++) {
+        var parts = specs[k].split(':');
+        var attr = parts.length > 1 ? parts[0].trim() : 'title';
+        var akey = (parts.length > 1 ? parts[1] : parts[0]).trim();
+        var avalue = STR[state.lang][akey];
+        if (avalue != null) attrNodes[j].setAttribute(attr, avalue);
+      }
+    }
     var label = $('#lang-label');
     if (label) label.textContent = t('langName');
     document.documentElement.setAttribute('data-lang', state.lang);
     document.documentElement.setAttribute('lang', state.lang);
+    // The theme button's label is language-dependent, so it is refreshed here
+    // rather than only when the theme itself changes.
+    applyTheme(currentTheme());
+  }
+
+  /* -------------------------------------------------------- sticky chrome ---
+     --topbar-h tells the page how much height the sticky chrome occupies, so
+     an anchored jump lands below it instead of underneath it. The stylesheet
+     ships a sensible default, but the real height depends on font metrics —
+     and this page is bilingual, so the same bar is taller in Bengali than in
+     English. Estimating it in CSS means being wrong by a few pixels in one of
+     the two languages; measuring it means being right in both. */
+  function syncTopbarHeight() {
+    var bar = $('.topbar');
+    var nav = $('#section-nav');
+    if (!bar) return;
+    // Below 640px the masthead stops sticking and only the nav does, so that
+    // is the height that matters there.
+    var sticky = window.getComputedStyle(bar).position === 'sticky' ? bar : nav;
+    if (!sticky) return;
+    var h = Math.round(sticky.getBoundingClientRect().height);
+    if (h > 0) document.documentElement.style.setProperty('--topbar-h', h + 'px');
+  }
+
+  function watchTopbarHeight() {
+    syncTopbarHeight();
+    var bar = $('.topbar');
+    if (bar && window.ResizeObserver) {
+      new ResizeObserver(syncTopbarHeight).observe(bar);
+    } else {
+      window.addEventListener('resize', syncTopbarHeight);
+    }
+  }
+
+  /* --------------------------------------------------------------- theme ---
+     index.html sets data-theme from an inline script before the stylesheet
+     paints; this only handles the toggle and keeps the button honest about
+     which theme is currently active. The OS preference is read once, at load,
+     by that inline script — a later OS change is deliberately not followed,
+     because overriding a user's explicit choice would be worse than missing a
+     preference change while the page is open. */
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark'
+      ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var btn = $('#theme-toggle');
+    if (!btn) return;
+    var dark = theme === 'dark';
+    // aria-pressed describes the button's own state, so it reads as "dark mode
+    // is on"; the label describes the action, which is the opposite direction.
+    btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    btn.setAttribute('aria-label', t(dark ? 'themeToLight' : 'themeToDark'));
+    btn.setAttribute('title', t('themeName'));
+  }
+
+  function setTheme(theme) {
+    applyTheme(theme);
+    try {
+      window.localStorage.setItem('theme', theme);
+    } catch (e) { /* private mode: the choice just does not persist */ }
+  }
+
+  /* --------------------------------------------------------- section nav ---
+     Progressive enhancement only. The nav is a set of plain in-page anchors
+     and works as one with no JavaScript at all; where IntersectionObserver
+     exists it additionally marks the section occupying the top of the
+     viewport, so the nav reports position rather than only offering jumps. */
+  function initSectionNav() {
+    var nav = $('#section-nav');
+    if (!nav || !window.IntersectionObserver) return;
+
+    var links = nav.querySelectorAll('[data-nav]');
+    var sections = [];
+    for (var i = 0; i < links.length; i++) {
+      var target = document.getElementById(links[i].getAttribute('data-nav'));
+      if (target) sections.push(target);
+    }
+    if (!sections.length) return;
+
+    var onScreen = {};
+    var observer = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        onScreen[entries[i].target.id] = entries[i].isIntersecting;
+      }
+      var active = null;
+      for (var j = 0; j < sections.length; j++) {
+        if (onScreen[sections[j].id]) { active = sections[j].id; break; }
+      }
+      for (var k = 0; k < links.length; k++) {
+        if (active && links[k].getAttribute('data-nav') === active) {
+          links[k].setAttribute('aria-current', 'true');
+        } else {
+          links[k].removeAttribute('aria-current');
+        }
+      }
+    }, {
+      // A thin band across the upper third. Without a bounded band every
+      // section taller than the viewport counts as intersecting at once and
+      // the marker would stick to the first of them no matter how far you
+      // scroll. With it, the marker follows what is actually at the top.
+      rootMargin: '-18% 0px -72% 0px',
+      threshold: 0
+    });
+
+    for (var m = 0; m < sections.length; m++) observer.observe(sections[m]);
   }
 
   function renderFocus() {
@@ -1008,6 +1244,21 @@
     }
     host.setAttribute('aria-label', t('queueLabel'));
 
+    // Rebuilding replaces every child, which detaches whatever was focused. A
+    // detached node does not keep focus: it falls to <body> without a word, and
+    // the keydown listener on #queue never sees another key. That is what made
+    // arrow navigation work exactly once — pressing a key selected the next
+    // item, the rebuild dropped focus, and the queue stopped hearing anything.
+    // Clicking was worse: the browser focuses a button on mousedown, so the
+    // rebuild in the click handler detached the very item just clicked, and the
+    // queue lost focus before the operator had pressed anything at all.
+    //
+    // Restoring here rather than in each caller covers the mouse path, the
+    // keyboard path and anything programmatic. It is conditional on the queue
+    // already holding focus, so a rebuild triggered by the what-if controls
+    // leaves focus where it is instead of pulling it out of the slider.
+    var hadFocus = host.contains(document.activeElement);
+
     if (!alerts.length) {
       host.innerHTML = emptyBlock(t('qEmptyTitle'), t('qEmptyBody'));
       return;
@@ -1036,9 +1287,16 @@
         + '</button></div>';
     }
     host.innerHTML = html;
+    if (hadFocus) focusQueueItem(state.selectedId);
   }
 
   function reasonFor(alert) {
+    // This line is the queue's triage text — the one thing an operator reads to
+    // decide which case to open — so it has to be in the language they are
+    // reading. Both are in the payload; this picks. A missing Bengali string
+    // falls back to the English rather than to nothing, because a reason in the
+    // wrong language still says what happened and a blank line does not.
+    if (state.lang === 'bn' && alert.reason_bn) return alert.reason_bn;
     return alert.reason || t('unknown');
   }
 
@@ -1231,17 +1489,28 @@
       for (var i = 0; i < history.length; i++) {
         html += evRow(history[i], alert.id);
       }
+      // Same statement as the case-history panel makes: this trail is in the order
+      // the actions happened, and the times beside them come from the simulated
+      // world clock, which is fixed while the page is open.
+      html += '<p class="horizon-note">' + esc(t('auditClockNote')) + '</p>';
     }
     return html + '</div></div>';
   }
 
   function evRow(event, alertId) {
-    var what = String(event.action || '') + ' · ' + String(alertId || '');
-    if (event.note) what += ' — ' + event.note;
+    // The verb and the case id are ASCII tokens straight from the API, so they are
+    // tagged as English; the note is free text an operator typed and may well be
+    // Bengali, so it is left untagged rather than declared English on a guess.
+    // Both used to be concatenated into one untagged span, which had a screen
+    // reader pronounce "acknowledged · LIQ-3" with a Bengali voice.
     return '<div class="ev">'
       + '<time datetime="' + esc(isoTime(event.ts)) + '">' + fTime(event.ts) + '</time>'
       + '<span class="who" lang="en">' + esc(event.actor || '') + '</span>'
-      + '<span class="what">' + esc(what) + '</span>'
+      + '<span class="what"><span lang="en">'
+      + esc(String(event.action || '') + ' · ' + String(alertId || ''))
+      + '</span>'
+      + (event.note ? ' — ' + esc(event.note) : '')
+      + '</span>'
       + '</div>';
   }
 
@@ -1407,6 +1676,15 @@
       host.innerHTML = emptyBlock(t('oNoTxnTitle'), t('oNoTxnBody'));
       return;
     }
+    // Which card, if any, held focus, so it can be handed back after the
+    // rebuild below. This is the same defect renderQueue was fixed for: innerHTML
+    // replaces every child, and a detached node does not keep focus — it falls to
+    // <body> without a word. An operator who pressed Enter on a card to open that
+    // outlet would be dropped to the top of the document and have to tab all the
+    // way back in.
+    var held = document.activeElement;
+    var heldId = (held && host.contains(held) && held.getAttribute)
+      ? held.getAttribute('data-outlet') : null;
     // Riskiest first: the signature view should open on the story, not on
     // whichever outlet happens to be first in the world.
     outlets.sort(function (a, b) {
@@ -1425,15 +1703,27 @@
       var o = outlets[j];
       var risk = isAtRisk(o);
       var isFocus = o.id === focusOutlet || (selected && selected.outlet_id === o.id);
+      // The header is the card's control. Activating it does what clicking a map
+      // dot already did — open this outlet's most severe open case, or show its
+      // runways — and until now that action was mouse-only: the dots are SVG
+      // circles inside a role="img" plot, so they are not focusable and are not
+      // read out either. The header is a real button rather than the whole card
+      // being one, because a button's descendants stop being separately readable
+      // and the rows underneath are the detail an operator is here for. The
+      // button wraps the summary line, and the name says the action.
+      var cardLabel = esc(o.name) + ' · ' + esc(o.id)
+        + (risk ? ', ' + esc(t('kAtRisk')) : '')
+        + '. ' + esc(t('oFocus'));
       html += '<div class="outlet' + (risk ? ' is-risk' : '')
         + (isFocus ? ' is-focused' : '') + '">';
-      html += '<div class="o-head">'
+      html += '<button type="button" class="o-head" data-outlet="' + esc(o.id)
+        + '" aria-label="' + cardLabel + '">'
         + '<span class="o-name" lang="en">' + esc(o.name) + '</span>'
         + '<span class="o-place" lang="en">' + esc(o.thana) + ', ' + esc(o.area)
         + ' · ' + esc(o.id) + '</span>'
         + '<span class="o-total">' + fBdt(o.total_value) + ' '
         + esc(t('oTotal')) + '</span>'
-        + '</div>';
+        + '</button>';
 
       if (!o.txn_count) {
         html += emptyBlock(t('oNoTxnTitle'), t('oNoTxnBody'));
@@ -1462,6 +1752,20 @@
       html += '</div>';
     }
     host.innerHTML = html;
+    // Handed back to the card that had it, not to the card that is highlighted:
+    // the highlight can move for reasons the operator did not ask for (a run
+    // reselects the focus outlet), and pulling focus to it would take them off
+    // whatever they were reading. If that card is gone the outlet list itself
+    // changed under them, and the panel has visibly re-rendered, so leaving focus
+    // on <body> is at least not a silent loss.
+    if (heldId) focusOutletCard(heldId);
+  }
+
+  function focusOutletCard(id) {
+    var cards = $('#outlets').querySelectorAll('[data-outlet]');
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].getAttribute('data-outlet') === id) { cards[i].focus(); return; }
+    }
   }
 
   /* ------------------------------------------------------------- map view */
@@ -1490,18 +1794,47 @@
 
   // Greedy label placement: a label is dropped rather than overprinted, so a
   // dense cluster degrades into fewer legible labels instead of a smear.
+  //
+  // Both plots are a fixed 640x400 viewBox that clips at its own edges, and the
+  // placer used to check labels only against each other. The eastern areas —
+  // Chattogram and Sylhet — sit close enough to the right boundary that their
+  // labels ran past it and were cut off mid-word at every viewport size. The
+  // bounds are checked too now, and a label that will not fit to the right of
+  // its dot is flipped to the left of it before being given up on: the standard
+  // cartographic fix, and better than dropping the label of an area that has an
+  // alert in it.
+  var PLOT_W = 640, PLOT_H = 400, LABEL_PAD = 5;
   function labelPlacer() {
     var placed = [];
-    return function (x, y, text) {
-      var width = String(text).length * 5.9 + 6;
-      var box = [x - 2, y - 9, x + width, y + 4];
+    function free(box) {
+      if (box[0] < LABEL_PAD || box[2] > PLOT_W - LABEL_PAD) return false;
+      if (box[1] < LABEL_PAD || box[3] > PLOT_H - LABEL_PAD) return false;
       for (var i = 0; i < placed.length; i++) {
         var p = placed[i];
         if (box[0] < p[2] && box[2] > p[0] && box[1] < p[3] && box[3] > p[1]) return false;
       }
-      placed.push(box);
       return true;
+    }
+    // Returns where to draw the label, or null when there is no room for it.
+    return function (x, y, text) {
+      var w = String(text).length * 5.9 + 6;
+      var sides = [
+        { x: x, anchor: 'start', box: [x - 2, y - 9, x + w, y + 4] },
+        { x: x, anchor: 'end', box: [x - w, y - 9, x + 2, y + 4] }
+      ];
+      for (var s = 0; s < sides.length; s++) {
+        if (!free(sides[s].box)) continue;
+        placed.push(sides[s].box);
+        return sides[s];
+      }
+      return null;
     };
+  }
+
+  // The two plots anchor labels the same way, so they emit them the same way.
+  function labelAttrs(put, y) {
+    return ' x="' + put.x + '" y="' + y + '"'
+      + (put.anchor === 'end' ? ' text-anchor="end"' : '');
   }
 
   function renderMap() {
@@ -1579,9 +1912,10 @@
       var info = perArea[name];
       var text = name + (info && info.at_risk_count > 0
         ? ' (' + fInt(info.at_risk_count) + ')' : '');
-      if (place(spot[0], spot[1] + 22, text)) {
-        labels += '<text class="map-label" x="' + spot[0] + '" y="' + (spot[1] + 22)
-          + '">' + esc(text) + '</text>';
+      var put = place(spot[0], spot[1] + 22, text);
+      if (put) {
+        labels += '<text class="map-label"'
+          + labelAttrs(put, spot[1] + 22) + '>' + esc(text) + '</text>';
       }
     }
 
@@ -1601,10 +1935,6 @@
     if (!areas.length) {
       host.innerHTML = emptyBlock(t('areasEmptyTitle'), t('areasEmptyBody'));
     } else {
-      var maxOutlets = 0;
-      for (var i = 0; i < areas.length; i++) {
-        if (areas[i].outlet_count > maxOutlets) maxOutlets = areas[i].outlet_count;
-      }
       var html = '<table><thead><tr>'
         + '<th>' + esc(t('thArea')) + '</th>'
         + '<th class="num">' + esc(t('thOutlets')) + '</th>'
@@ -1616,17 +1946,26 @@
       for (var j = 0; j < areas.length; j++) {
         var area = areas[j];
         // A ratio of two counts — outlets at risk over outlets in the area.
-        // No money is divided here.
-        var share = maxOutlets > 0 ? (area.at_risk_count / maxOutlets) * 100 : 0;
+        // No money is divided here. The denominator has to be the area's own
+        // outlet count: dividing by the largest area instead (as this did) made
+        // the bar a share of the wrong whole, so with unequal areas a small
+        // area's 1-of-3 drew the same bar as a large area's 1-of-4 and pressure
+        // was understated wherever the area was the smaller one. The count is
+        // carried in a title as well, so the bar is not the only carrier of it.
+        var pct = area.outlet_count > 0
+          ? (area.at_risk_count / area.outlet_count) * 100 : 0;
         var calm = area.at_risk_count === 0 ? ' calm' : '';
+        var pressure = t('thPressure') + ': ' + fInt(area.at_risk_count)
+          + '/' + fInt(area.outlet_count);
         html += '<tr>'
           + '<td lang="en">' + esc(area.area) + '</td>'
           + '<td class="num">' + fInt(area.outlet_count) + '</td>'
           + '<td class="num">' + fInt(area.at_risk_count) + '</td>'
           + '<td class="num">' + fBdt(area.total_cash) + '</td>'
           + '<td class="num">' + fBdt(area.total_emoney) + '</td>'
-          + '<td class="bar-cell"><div class="hbar' + calm + '"><i style="width:'
-          + (Math.round(share * 10) / 10) + '%"></i></div></td>'
+          + '<td class="bar-cell"><div class="hbar' + calm + '" title="'
+          + esc(pressure) + '"><i style="width:'
+          + (Math.round(pct * 10) / 10) + '%"></i></div></td>'
           + '</tr>';
       }
       host.innerHTML = html + '</tbody></table>';
@@ -1743,9 +2082,10 @@
         + '" cx="' + pt[0] + '" cy="' + pt[1] + '" r="'
         + (concentrated ? 8 : 6) + '"><title>' + esc(o.name + ' · ' + o.id
         + (concentrated ? ' — ' + t('netConcentrated') : '')) + '</title></circle>';
-      if (place(pt[0] + 10, pt[1] + 3, o.id)) {
-        svg += '<text class="net-name" x="' + (pt[0] + 10) + '" y="' + (pt[1] + 3)
-          + '">' + esc(o.id) + '</text>';
+      var put = place(pt[0] + 10, pt[1] + 3, o.id);
+      if (put) {
+        svg += '<text class="net-name"' + labelAttrs(put, pt[1] + 3) + '>'
+          + esc(o.id) + '</text>';
       }
     }
     svg += '</svg>';
@@ -1856,7 +2196,11 @@
     var host = $('#audit');
     if (!host) return;
     if (state.casesError) {
-      host.innerHTML = emptyBlock(t('loadFailed'), state.casesError);
+      // The same recovery the fatal banner offers, but named for what actually
+      // failed. This state is the snapshot loading and the case trail not, so a
+      // heading borrowed from the other one would tell the operator that the page
+      // they are looking at full of data could not load.
+      host.innerHTML = fatalBlock(state.casesError, t('casesLoadFailed'));
       return;
     }
     var cases = state.cases || [];
@@ -1869,6 +2213,13 @@
     for (var i = 0; i < shown.length; i++) {
       html += evRow(shown[i], shown[i].alert_id);
     }
+    // Stated rather than left to be discovered. Every case event is stamped with
+    // the snapshot's simulated clock, which is fixed for the life of the page, so
+    // two actions taken minutes apart carry the same time and the visible column
+    // cannot order them. The rows are in recording order, which is the real
+    // ordering — saying so turns a column that looks broken into a documented
+    // property of a simulated clock.
+    html += '<p class="horizon-note">' + esc(t('auditClockNote')) + '</p>';
     if (cases.length > shown.length) {
       html += '<p class="horizon-note">' + esc(t('auditTruncated')
         .replace('{shown}', fInt(shown.length))
@@ -1879,11 +2230,22 @@
 
   function renderFatal(error) {
     state.fatal = error;
-    var message = (error && error.detail) || (error && error.message)
-      || t('loadFailed');
+    var raw = String((error && (error.detail || error.message)) || '').trim();
+    // A message identical to the heading adds nothing, and the heading plus the
+    // same sentence again is what the banner showed when a language switch
+    // re-rendered the fatal state from a synthetic error: it made a failure read
+    // as unfinished rather than as reported. Treated as no detail at all.
+    var message = raw === t('loadFailed') ? '' : raw;
     state.alerts = [];
     state.snapshot = null;
-    var panels = ['#focus', '#kpis', '#queue', '#detail', '#outlets', '#map',
+    // Only the focus banner carries the retry control. The fatal state replaces
+    // every panel with the same message, and a button repeated in all of them
+    // would be a dozen identical tab stops for one action — and a dozen copies of
+    // one id. The banner is the top of the page, so it is where the one control
+    // belongs; the panels below it state the same failure without repeating it.
+    var banner = $('#focus');
+    if (banner) banner.innerHTML = fatalBlock(message);
+    var panels = ['#kpis', '#queue', '#detail', '#outlets', '#map',
                   '#areas', '#support', '#network', '#whatif', '#metrics'];
     for (var i = 0; i < panels.length; i++) {
       var node = $(panels[i]);
@@ -1891,7 +2253,7 @@
     }
     var audit = $('#audit');
     if (audit) audit.innerHTML = emptyBlock(t('loadFailed'), message);
-    toast(t('loadFailed') + ' — ' + message, true);
+    toast(t('loadFailed') + (message ? ' — ' + message : ''), true);
   }
 
   function renderAll() {
@@ -1989,6 +2351,24 @@
     return null;
   }
 
+  // Both of the focus helpers below exist for the same reason: every one of
+  // these panels is rebuilt with innerHTML, so a node captured before a render
+  // is detached by the time it could be focused, and focusing a detached node
+  // silently sends focus to <body>. Anything that restores focus has to look
+  // the node up again *after* the last render of the chain has run.
+  function focusQueueItem(id) {
+    var items = $('#queue').querySelectorAll('[data-alert]');
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].getAttribute('data-alert') === id) { items[i].focus(); return; }
+    }
+  }
+
+  function restoreActFocus(act) {
+    if (!act) return;
+    var again = document.querySelector('[data-act="' + act + '"]');
+    if (again) again.focus();
+  }
+
   function selectAlert(id) {
     if (!id) return;
     var changed = state.selectedId !== id;
@@ -2020,12 +2400,23 @@
   }
 
   function simulate(payload, onDone) {
-    if (state.busy) return Promise.resolve(null);
+    if (state.busy) {
+      // Something is already in flight — a run, or a case action on the detail
+      // panel, which shares this flag. Refusing the second request is right:
+      // the server recomputes the whole network, and two overlapping runs
+      // would race to paint the page. Refusing it in silence is not: the
+      // operator moved a control, nothing happened, and nothing said why, which
+      // is indistinguishable from the control being broken.
+      toast(t('runBusy'), true);
+      return Promise.resolve(null);
+    }
     state.busy = true;
     setControlsDisabled(true);
+    setRunBusy(true);
     return postJson('/api/simulate', payload).then(function (snap) {
       state.busy = false;
       setControlsDisabled(false);
+      setRunBusy(false);
       state.snapshot = snap;
       state.alerts = snap.alerts || [];
       if (state.selectedId && !findAlert(state.selectedId)) state.selectedId = null;
@@ -2039,17 +2430,72 @@
     }).catch(function (error) {
       state.busy = false;
       setControlsDisabled(false);
+      setRunBusy(false);
       toast((error && error.detail) || t('actionFailed'), true);
       return null;
     });
   }
 
+  // The control that held focus when the controls were last disabled, so it can
+  // be given focus back when they are usable again.
+  var pendingFocusRestore = null;
+
   function setControlsDisabled(disabled) {
     var ids = ['#scenario', '#wi-demand', '#wi-run', '#wi-event'];
+    // Disabling an element takes focus off it — a browser will not leave focus
+    // on a control the user cannot operate — and it lands on <body> without a
+    // word. Every what-if run therefore dropped the operator's place to the top
+    // of the document, so changing one setting and then another meant tabbing
+    // through the whole page in between. Remember which control it was, and
+    // hand focus back once that control is usable again.
+    if (disabled) {
+      pendingFocusRestore = null;
+      for (var j = 0; j < ids.length; j++) {
+        if (document.activeElement === $(ids[j])) { pendingFocusRestore = ids[j]; break; }
+      }
+    }
     for (var i = 0; i < ids.length; i++) {
       var node = $(ids[i]);
       if (node) node.disabled = !!disabled;
     }
+    if (!disabled && pendingFocusRestore) {
+      var back = $(pendingFocusRestore);
+      pendingFocusRestore = null;
+      // Restoring here rather than after the caller's renderAll is safe because
+      // renders do not replace these four nodes: #scenario is static markup, and
+      // renderWhatIf builds the other three once and then updates them in place —
+      // precisely so that a re-render cannot steal a drag mid-gesture. Because the
+      // node survives, focus can be put back immediately; waiting a frame would
+      // instead leave focus visibly sitting on <body> in between, which is the
+      // flicker this exists to remove.
+      if (back && !back.disabled) back.focus();
+    }
+  }
+
+  // A run calls the server and the network is recomputed there, which takes
+  // several seconds. Disabling the controls stopped a second run from being
+  // started, but a page whose only visible change is a set of greyed-out
+  // controls reads as broken rather than busy. The label is the signal; the
+  // rotating icon beside it is decoration, and the panel is marked busy so the
+  // state is available to assistive technology and not only to the eye.
+  //
+  // This is driven by simulate() and not by setControlsDisabled(), because a
+  // case action disables the same controls without recomputing anything —
+  // showing "recomputing…" over an acknowledge would be the button describing
+  // work the system is not doing.
+  function setRunBusy(busy) {
+    var button = $('#wi-run');
+    var panel = $('#whatif');
+    if (button) {
+      button.classList.toggle('is-busy', !!busy);
+      // Read the label from the dictionary at restore time rather than caching
+      // the string that was there before: a language switch mid-run re-labels
+      // every control, and a cached English string would put English back into
+      // a Bengali button.
+      var label = button.querySelector('span');
+      if (label) label.textContent = t(busy ? 'wiRerun' : 'wiRun');
+    }
+    if (panel) panel.setAttribute('aria-busy', busy ? 'true' : 'false');
   }
 
   function doAction(action) {
@@ -2081,9 +2527,20 @@
     }).then(function (updated) {
       state.busy = false;
       setControlsDisabled(false);
-      applyUpdatedAlert(id, updated, restoreAct);
-      toast(t('actionRecorded') + ' — ' + action);
-      return refreshCases(id);
+      applyUpdatedAlert(id, updated);
+      // A resolved case that moves again has gone backwards. That is allowed —
+      // resolving by mistake has to be correctable — but saying only "action
+      // recorded" over it is what made it a defect, so it is named for what it
+      // is. The server decides; the dashboard does not infer this from statuses.
+      toast(updated && updated.reopened
+        ? t('caseReopened') + ' — ' + action
+        : t('actionRecorded') + ' — ' + action);
+      // Focus comes back after refreshCases, not before it: that call renders
+      // the detail panel a second time once the history arrives, and a button
+      // focused in applyUpdatedAlert is detached a moment later, dropping focus
+      // to <body> and making a keyboard operator re-tab through the whole panel
+      // after every single action.
+      return refreshCases(id).then(function () { restoreActFocus(restoreAct); });
     }).catch(function (error) {
       state.busy = false;
       setControlsDisabled(false);
@@ -2097,7 +2554,7 @@
     });
   }
 
-  function applyUpdatedAlert(id, updated, restoreAct) {
+  function applyUpdatedAlert(id, updated) {
     var history = state.history[id] || [];
     var replaced = false;
     for (var i = 0; i < state.alerts.length; i++) {
@@ -2116,10 +2573,6 @@
     renderQueue();
     renderDetail();
     renderOutlets();
-    if (restoreAct) {
-      var again = document.querySelector('[data-act="' + restoreAct + '"]');
-      if (again) again.focus();
-    }
     var panel = $('#detail');
     if (panel) fadeIn(panel, 200);
   }
@@ -2163,6 +2616,11 @@
     var node = event.target;
     if (!node || !node.closest) return;
 
+    // Ahead of the [data-act] branch because doAction refuses to run without a
+    // selected case, and this is the state where there may be no snapshot and no
+    // selection at all — the one case where retrying is the only thing to do.
+    if (node.closest('#fatal-retry')) { event.preventDefault(); refresh(); return; }
+
     var act = node.closest('[data-act]');
     if (act) { event.preventDefault(); doAction(act.getAttribute('data-act')); return; }
 
@@ -2179,7 +2637,11 @@
     var item = node.closest('[data-alert]');
     if (item) { selectAlert(item.getAttribute('data-alert')); return; }
 
-    if (node.closest('#lang-toggle')) { setLang(state.lang === 'bn' ? 'en' : 'bn'); }
+    if (node.closest('#lang-toggle')) { setLang(state.lang === 'bn' ? 'en' : 'bn'); return; }
+
+    if (node.closest('#theme-toggle')) {
+      setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+    }
   }
 
   function onQueueKeydown(event) {
@@ -2199,8 +2661,11 @@
     if (event.key === 'End') next = buttons.length - 1;
     if (next < 0) next = 0;
     if (next > buttons.length - 1) next = buttons.length - 1;
+    // No focus call here: selectAlert rebuilds the queue, and renderQueue is
+    // where focus is put back — it restores to whichever item is selected once
+    // the new nodes exist. Doing it here as well meant two places had to agree
+    // about when the last render of the chain had run.
     selectAlert(buttons[next].getAttribute('data-alert'));
-    buttons[next].focus();
   }
 
   function onScenarioChange(event) {
@@ -2241,6 +2706,8 @@
     applyI18n();
 
     document.addEventListener('click', onClick);
+    initSectionNav();
+    watchTopbarHeight();
 
     var queue = $('#queue');
     if (queue) queue.addEventListener('keydown', onQueueKeydown);
@@ -2250,6 +2717,12 @@
 
     var whatif = $('#whatif');
     if (whatif) {
+      // Stated once, here, so the panel's busy state is a property the page
+      // declares from the start rather than one that only appears after the
+      // first run. It is set at boot rather than in renderWhatIf because a
+      // render can land while a run is in flight, and a render that reset this
+      // attribute would quietly cancel the announcement of work in progress.
+      whatif.setAttribute('aria-busy', 'false');
       whatif.addEventListener('input', function (event) {
         if (event.target && event.target.id === 'wi-demand') onDemandInput(event);
       });

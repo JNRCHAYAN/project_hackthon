@@ -10,6 +10,7 @@ a request that reaches across provider tracks gets a 403, not a silent success.
 """
 from __future__ import annotations
 
+import math
 import threading
 from contextlib import asynccontextmanager
 
@@ -23,6 +24,80 @@ from app.engine import Engine
 _engine: Engine | None = None
 _lock = threading.Lock()
 STATIC_DIR = SETTINGS["root"] / "static"
+
+
+def _as_int(raw, field: str, low: int | None = None,
+            high: int | None = None) -> int:
+    """Coerce a request field to an int, optionally clamped, or raise 422.
+
+    ``int()`` inside an ``except (TypeError, ValueError)`` looks like it covers
+    everything and does not. A JSON number too large for a float parses to
+    infinity, and ``int(inf)`` raises ``OverflowError`` — a subclass of neither
+    — so ``{"outlets": 1e400}`` answered 500. A list raises ``TypeError``, which
+    is caught, but a bool is an int subclass and would sail through as 1 or 0.
+    Every one of these is the caller sending the wrong shape, which is a 422:
+    a 500 blames the server for the client's mistake and hides the real faults
+    in the logs.
+
+    Bounds are optional so that a field with no meaningful range (the seed) is
+    validated without also being silently clamped — quietly replacing a
+    caller's number with a different one is its own kind of wrong answer.
+    """
+    if isinstance(raw, bool):
+        raise HTTPException(status_code=422, detail=f"{field} must be an int")
+    # A float is accepted only when it is a whole number. JSON encoders are not
+    # obliged to distinguish 12 from 12.0, so a client that arrived at a count by
+    # arithmetic may send either and both name the same quantity. 12.7 names no
+    # outlet count, and ``int()`` would quietly make it 12 — the caller would get
+    # back a different number from the one they sent and nothing would say so.
+    # Non-finite values fall here too: neither infinity nor NaN is a whole
+    # number, so they are refused before ``int()`` can raise ``OverflowError``.
+    if isinstance(raw, float) and not raw.is_integer():
+        raise HTTPException(status_code=422, detail=f"{field} must be an int")
+    try:
+        value = int(raw)
+    except (TypeError, ValueError, OverflowError):
+        raise HTTPException(status_code=422, detail=f"{field} must be an int")
+    if low is not None:
+        value = max(low, value)
+    if high is not None:
+        value = min(high, value)
+    return value
+
+
+def _bounded_float(raw, low: float, high: float, field: str) -> float:
+    """Coerce a request field to a finite float in ``[low, high]``, or raise 422.
+
+    Infinity and NaN are rejected rather than clamped. ``min``/``max`` with a
+    NaN operand return whichever argument the comparison happened to favour, so
+    ``{"demand_multiplier": NaN}`` was silently becoming 5.0 — a number the
+    caller never asked for, presented as their own input.
+    """
+    if isinstance(raw, bool):
+        raise HTTPException(status_code=422, detail=f"{field} must be a number")
+    try:
+        value = float(raw)
+    except (TypeError, ValueError, OverflowError):
+        raise HTTPException(status_code=422,
+                            detail=f"{field} must be a number")
+    if not math.isfinite(value):
+        raise HTTPException(status_code=422,
+                            detail=f"{field} must be a finite number")
+    return max(low, min(high, value))
+
+
+def _text(raw, field: str, default: str = "") -> str:
+    """Coerce a request field to a stripped string, or raise 422.
+
+    ``(payload.get("action") or "").strip()`` reads as though it handles every
+    input, but a list or a number reaches ``.strip`` and raises
+    ``AttributeError``, which surfaced as a 500.
+    """
+    if raw is None:
+        return default
+    if not isinstance(raw, str):
+        raise HTTPException(status_code=422, detail=f"{field} must be a string")
+    return raw.strip()
 
 
 def get_engine() -> Engine:
@@ -80,28 +155,21 @@ def simulate(payload: dict = Body(default={})) -> dict:
     """
     engine = get_engine()
     scenario = payload.get("scenario")
-    if scenario is not None and scenario not in engine.SCENARIO_COPY:
-        raise HTTPException(status_code=422,
-                            detail=f"unknown scenario: {scenario!r}")
+    # `scenario not in <dict>` raises TypeError on an unhashable value, so the
+    # type is checked before the membership test rather than instead of it.
+    if scenario is not None:
+        if not isinstance(scenario, str) or scenario not in engine.SCENARIO_COPY:
+            raise HTTPException(status_code=422,
+                                detail=f"unknown scenario: {scenario!r}")
     outlets = payload.get("outlets")
     if outlets is not None:
-        try:
-            outlets = max(1, min(60, int(outlets)))
-        except (TypeError, ValueError):
-            raise HTTPException(status_code=422, detail="outlets must be an int")
+        outlets = _as_int(outlets, "outlets", low=1, high=60)
     seed = payload.get("seed")
     if seed is not None:
-        try:
-            seed = int(seed)
-        except (TypeError, ValueError):
-            raise HTTPException(status_code=422, detail="seed must be an int")
+        seed = _as_int(seed, "seed")
     demand = payload.get("demand_multiplier")
     if demand is not None:
-        try:
-            demand = max(0.1, min(5.0, float(demand)))
-        except (TypeError, ValueError):
-            raise HTTPException(status_code=422,
-                                detail="demand_multiplier must be a number")
+        demand = _bounded_float(demand, 0.1, 5.0, "demand_multiplier")
 
     with _lock:
         snapshot = engine.rebuild(scenario=scenario, outlets=outlets, seed=seed,
@@ -130,10 +198,15 @@ def alert_action(alert_id: str, payload: dict = Body(default={})) -> dict:
     in the browser.
     """
     engine = get_engine()
-    action = (payload.get("action") or "").strip()
-    actor = (payload.get("actor") or "dashboard_user").strip()
-    note = (payload.get("note") or "").strip()
-    actor_provider = payload.get("actor_provider") or None
+    action = _text(payload.get("action"), "action")
+    actor = _text(payload.get("actor"), "actor", "dashboard_user") \
+        or "dashboard_user"
+    note = _text(payload.get("note"), "note")
+    actor_provider = payload.get("actor_provider")
+    if actor_provider is not None:
+        # Stripped before it is compared, so " nagad" is treated as the same
+        # declaration as "nagad" rather than as a different, foreign track.
+        actor_provider = _text(actor_provider, "actor_provider") or None
     try:
         return engine.act(alert_id, action, actor, note, actor_provider)
     except KeyError:
