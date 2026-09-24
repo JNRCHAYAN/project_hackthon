@@ -11,6 +11,11 @@ unusual activity, and coordination.
 > makes no fraud determination.** All data is synthetic. Risk signals are advisory and
 > require human review.
 
+**Deployment:** the repository ships deploy-ready for Render's free tier (`render.yaml`).
+Creating the service needs a Render account, so it is a documented manual step — see
+[`DEPLOYMENT.md`](DEPLOYMENT.md), which also covers cold-start behaviour and the
+ephemeral-storage limitation.
+
 ---
 
 ## The core insight
@@ -48,7 +53,16 @@ The guardrail generates the recommendation. That is the product.
   the projection is **withdrawn** rather than guessed.
 - **Coordination** — alerts route to a named owner, carry a recommended next step, and move
   through acknowledge → escalate → resolve with an append-only audit trail.
+- **Coverage and hotspots** — areas ranked by how many outlets are projected to run dry
+  inside the alert horizon, with nearby-outlet support discovery: an outlet holding headroom
+  *in the same provider* can be coordinated with through the approved channel.
+- **Cross-outlet relationships** — accounts appearing at three or more outlets, and accounts
+  active across multiple providers. Presented as a lead for a human, never as a finding.
+- **What-if** — a demand multiplier that re-runs the projection live, because the analytics
+  are pure functions.
 - **Bengali-first** explanations with an English toggle.
+- **Evidence pack** — one download carrying alerts, thresholds, projections, feed status and
+  case history, so a reviewer never has to take the dashboard's word for anything.
 
 ---
 

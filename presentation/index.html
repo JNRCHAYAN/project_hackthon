@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Agent Liquidity &amp; Risk Intelligence Platform — Final Presentation</title>
+<!--
+  Design decision: NO external CDN.
+  The slides skill template loads Chart.js from jsdelivr. This deck must work
+  offline (a hackathon demo room may have no reliable network), so the single
+  chart is hand-built inline SVG and every other figure is CSS. No script tags
+  from any external origin appear in this file.
+-->
+<style>
+:root{
+  --bg:#0A0D12;
+  --surface:#131A23;
+  --surface-2:#1A2330;
+  --line:rgba(255,255,255,0.10);
+  --line-strong:rgba(255,255,255,0.18);
+  --text:#EEF2F7;
+  --muted:#94A3B4;
+  --dim:#64748B;
+  --primary:#FF4D8D;
+  --primary-soft:rgba(255,77,141,0.14);
+  --accent:#2DD4A7;
+  --accent-soft:rgba(45,212,167,0.13);
+  --warn:#F5B547;
+  --warn-soft:rgba(245,181,71,0.13);
+  --danger:#FF6B6B;
+  --danger-soft:rgba(255,107,107,0.13);
+  --info:#5AA9FF;
+  --info-soft:rgba(90,169,255,0.13);
+  --grad:linear-gradient(120deg,#FF4D8D 0%,#FF8A5B 55%,#F5B547 100%);
+  --font-head:'Segoe UI Semibold','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-bn:'Nirmala UI','Noto Sans Bengali','Vrinda','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.bn{font-family:var(--font-bn);line-height:1.85;}
+
+/* ---------- deck frame ---------- */
+.slide-deck{
+  position:relative;width:100vw;height:100vh;overflow:hidden;
+}
+@media (min-width:769px){
+  .slide-deck{
+    max-width:calc(100vh * 16 / 9);
+    max-height:calc(100vw * 9 / 16);
+    margin:auto;position:absolute;inset:0;
+    border:1px solid var(--line);
+  }
+}
+.slide{
+  position:absolute;width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:52px 64px;
+  opacity:0;visibility:hidden;transition:opacity .35s ease;
+  background:var(--bg);
+  overflow:hidden;
+}
+.slide.active{opacity:1;visibility:visible;}
+.slide-content{
+  width:100%;max-width:100%;max-height:100%;
+  overflow:auto;scrollbar-width:thin;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;
+}
+.slide-content::-webkit-scrollbar{width:6px;}
+.slide-content::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:3px;}
+.slide-content.body{align-items:stretch;text-align:left;justify-content:flex-start;}
+
+/* ---------- persistent stamp ---------- */
+.stamp{
+  position:absolute;top:20px;right:26px;
+  font-size:10.5px;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--dim);border:1px solid var(--line);border-radius:100px;
+  padding:5px 12px;background:rgba(10,13,18,.6);z-index:5;white-space:nowrap;
+}
+.stamp b{color:var(--accent);font-weight:600;}
+
+/* ---------- typography ---------- */
+h1,h2,h3{font-family:var(--font-head);line-height:1.12;letter-spacing:-.015em;}
+.slide-title{
+  font-size:clamp(30px,4.4vw,58px);
+  background:var(--grad);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+h2{font-size:clamp(22px,2.75vw,38px);color:var(--text);font-weight:650;}
+h3{font-size:clamp(14px,1.28vw,18px);color:var(--text);font-weight:650;}
+p,li,td,th{font-size:clamp(12px,1.06vw,15.5px);line-height:1.5;}
+.lead{font-size:clamp(13px,1.3vw,18px);color:#C6D0DC;line-height:1.55;}
+.eyebrow{
+  font-size:clamp(10px,.85vw,12.5px);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--primary);font-weight:600;
+}
+.kicker{font-size:clamp(10px,.82vw,12px);letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:600;}
+.muted{color:var(--muted);}
+.dim{color:var(--dim);}
+.tiny{font-size:clamp(10px,.83vw,12.5px);line-height:1.45;}
+strong{color:#fff;font-weight:650;}
+em.hl{font-style:normal;color:var(--primary);font-weight:600;}
+
+/* ---------- slide header ---------- */
+.shead{border-left:3px solid var(--primary);padding-left:14px;margin-bottom:4px;}
+.shead .kicker{display:block;margin-bottom:5px;}
+
+/* ---------- generic surfaces ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;text-align:left;
+}
+.card.pad-lg{padding:18px 20px;}
+.card h3{margin-bottom:5px;}
+.card p,.card li{color:var(--muted);}
+.card.accent{border-left:3px solid var(--accent);}
+.card.warn{border-left:3px solid var(--warn);}
+.card.danger{border-left:3px solid var(--danger);}
+.card.info{border-left:3px solid var(--info);}
+.card.primary{border-left:3px solid var(--primary);}
+.grid{display:grid;gap:12px;width:100%;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g5{grid-template-columns:repeat(5,1fr);}
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start;width:100%;}
+.split-even{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;width:100%;}
+
+ul.ticks{list-style:none;display:flex;flex-direction:column;gap:6px;}
+ul.ticks li{position:relative;padding-left:17px;color:var(--muted);}
+ul.ticks li::before{
+  content:"";position:absolute;left:0;top:.5em;width:6px;height:6px;border-radius:50%;
+  background:var(--primary);
+}
+ul.ticks.ok li::before{background:var(--accent);}
+ul.ticks.no li::before{background:var(--danger);}
+ul.ticks li b{color:var(--text);font-weight:600;}
+
+table{width:100%;border-collapse:collapse;}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-size:clamp(9.5px,.78vw,11.5px);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;}
+td{color:var(--muted);}
+td b,td strong{color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr.hi td{background:rgba(255,77,141,.05);}
+
+.pill{
+  display:inline-block;font-size:clamp(9.5px,.78vw,11.5px);font-weight:600;letter-spacing:.05em;
+  padding:3px 9px;border-radius:100px;border:1px solid var(--line-strong);color:var(--muted);
+  white-space:nowrap;
+}
+.pill.p{color:var(--primary);border-color:rgba(255,77,141,.4);background:var(--primary-soft);}
+.pill.a{color:var(--accent);border-color:rgba(45,212,167,.4);background:var(--accent-soft);}
+.pill.w{color:var(--warn);border-color:rgba(245,181,71,.4);background:var(--warn-soft);}
+.pill.d{color:var(--danger);border-color:rgba(255,107,107,.4);background:var(--danger-soft);}
+.pill.i{color:var(--info);border-color:rgba(90,169,255,.4);background:var(--info-soft);}
+
+.callout{
+  border-radius:10px;padding:12px 15px;text-align:left;
+  background:var(--primary-soft);border:1px solid rgba(255,77,141,.28);
+}
+.callout.accent{background:var(--accent-soft);border-color:rgba(45,212,167,.28);}
+.callout.warn{background:var(--warn-soft);border-color:rgba(245,181,71,.28);}
+.callout p{color:#DCE4EE;}
+
+/* ---------- code-ish ---------- */
+code,.mono{
+  font-family:'Cascadia Mono','Consolas','SF Mono',Menlo,monospace;
+  font-size:clamp(10px,.85vw,12.5px);
+  background:rgba(255,255,255,.055);border:1px solid var(--line);
+  border-radius:5px;padding:1.5px 6px;color:#CFE3FF;
+}
+pre{
+  font-family:'Cascadia Mono','Consolas',monospace;font-size:clamp(9.5px,.8vw,12px);
+  background:#0D131B;border:1px solid var(--line);border-radius:10px;
+  padding:12px 14px;color:#B8C7DA;overflow:auto;text-align:left;line-height:1.7;
+}
+pre b{color:var(--accent);font-weight:600;}
+pre i{color:var(--dim);font-style:normal;}
+
+/* ---------- metric / number ---------- */
+.figure{font-family:var(--font-head);font-size:clamp(20px,2.4vw,34px);font-weight:680;letter-spacing:-.02em;}
+.figure.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.figure.a{color:var(--accent);}
+.figure.w{color:var(--warn);}
+.figure.d{color:var(--danger);}
+
+/* ---------- direction table (slide 4) ---------- */
+table.dir td:first-child{font-weight:600;color:var(--text);}
+td.up{color:var(--accent);font-weight:600;}
+td.down{color:var(--danger);font-weight:600;}
+
+/* ---------- architecture diagram ---------- */
+.arch{width:100%;display:flex;flex-direction:column;gap:5px;}
+.arch-row{display:grid;gap:8px;}
+.arch-box{
+  background:var(--surface);border:1px solid var(--line);border-radius:9px;
+  padding:9px 11px;text-align:left;
+}
+.arch-box .t{font-size:clamp(11px,.92vw,13.5px);font-weight:650;color:var(--text);display:block;}
+.arch-box .s{font-size:clamp(9.5px,.78vw,11.5px);color:var(--dim);display:block;margin-top:2px;line-height:1.4;}
+.arch-box.ana{border-color:rgba(45,212,167,.34);background:rgba(45,212,167,.06);}
+.arch-box.dec{border-color:rgba(245,181,71,.32);background:rgba(245,181,71,.055);}
+.arch-box.sim{border-color:rgba(255,77,141,.36);background:rgba(255,77,141,.07);}
+.arch-box.srv{border-color:rgba(90,169,255,.32);background:rgba(90,169,255,.06);}
+.arch-box.aud{border-style:dashed;}
+.arch-lane{
+  font-size:clamp(9px,.75vw,11px);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);font-weight:600;margin-bottom:3px;
+}
+.arch-flow{
+  text-align:center;font-size:clamp(9.5px,.78vw,11.5px);color:var(--dim);
+  padding:1px 0;line-height:1.4;
+}
+.arch-flow b{color:var(--primary);font-weight:600;}
+
+/* ---------- coordination flow ---------- */
+.flow{display:flex;align-items:stretch;gap:0;width:100%;}
+.flow-node{
+  flex:1;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:11px 9px;text-align:center;
+}
+.flow-node .n{font-size:clamp(10px,.85vw,12.5px);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;}
+.flow-node .v{font-size:clamp(11.5px,.95vw,14px);font-weight:650;color:var(--text);margin-top:4px;}
+.flow-node .d{font-size:clamp(9.5px,.78vw,11.5px);color:var(--muted);margin-top:3px;line-height:1.4;}
+.flow-sep{display:flex;align-items:center;justify-content:center;width:22px;color:var(--primary);font-size:14px;flex:0 0 22px;}
+
+/* ---------- svg chart ---------- */
+.chart-wrap{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+.chart-wrap svg{width:100%;height:auto;display:block;}
+.axis{stroke:rgba(255,255,255,.16);stroke-width:1;}
+.axis-t{fill:var(--dim);font-size:9.5px;font-family:var(--font-body);}
+.band{fill:rgba(255,77,141,.16);}
+.drain{stroke:var(--danger);stroke-width:2.4;fill:none;stroke-linecap:round;}
+.center{stroke:#fff;stroke-width:1.6;stroke-dasharray:4 4;fill:none;opacity:.65;}
+.marker{stroke:var(--warn);stroke-width:1.6;stroke-dasharray:5 4;}
+.dot{fill:var(--primary);}
+.note{fill:#DCE4EE;font-size:10px;font-family:var(--font-body);font-weight:600;}
+.note-s{fill:var(--dim);font-size:9px;font-family:var(--font-body);}
+
+/* ---------- nav ---------- */
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--primary);transition:width .3s;z-index:1000;}
+.nav-controls{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:16px;z-index:1000;
+  background:rgba(10,13,18,.82);border:1px solid var(--line);border-radius:100px;padding:6px 12px;
+  backdrop-filter:blur(6px);
+}
+.nav-btn{
+  background:rgba(255,255,255,.08);border:none;color:#fff;width:34px;height:34px;
+  border-radius:50%;cursor:pointer;font-size:16px;line-height:1;transition:background .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.2);}
+.slide-counter{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .slide{padding:34px 26px;}
+  .g5{grid-template-columns:repeat(2,1fr);}
+  .g4{grid-template-columns:repeat(2,1fr);}
+  .g3{grid-template-columns:repeat(2,1fr);}
+  .split,.split-even{grid-template-columns:1fr;gap:14px;}
+  .flow{flex-direction:column;gap:5px;}
+  .flow-sep{width:100%;flex:none;transform:rotate(90deg);}
+}
+@media (max-width:480px){
+  .slide{padding:24px 16px;}
+  .g2,.g3,.g4,.g5{grid-template-columns:1fr;}
+  .slide-title{font-size:clamp(21px,6vw,34px);}
+  .stamp{display:none;}
+  .nav-controls{bottom:12px;gap:10px;}
+  .nav-btn{width:30px;height:30px;font-size:13px;}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slide-deck" id="deck">
+
+  <!-- ============ 1 · TITLE ============ -->
+  <div class="slide active">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content" style="gap:20px;">
+      <span class="eyebrow">Codex Community Hackathon — bKash presents SUST CSE Carnival 2026</span>
+      <h1 class="slide-title">Super Agent Liquidity<br>&amp; Risk Intelligence Platform</h1>
+      <p class="lead" style="max-width:820px;">
+        One cash drawer, three logically separate provider balances — and an operational
+        question nobody can currently answer: <strong>will this outlet still be able to serve
+        customers in the next few hours?</strong>
+      </p>
+      <div class="grid g3" style="max-width:900px;margin-top:2px;">
+        <div class="card primary">
+          <h3>Projects, per provider</h3>
+          <p>A robust drain rate and an exhaustion <em class="hl">interval</em> for shared cash
+          and for each provider separately — never a false point estimate.</p>
+        </div>
+        <div class="card accent">
+          <h3>Classifies, with reasons</h3>
+          <p>Tells an operational demand spike from a data-quality problem from a pattern
+          requiring review — and names the hypotheses it rejected.</p>
+        </div>
+        <div class="card warn">
+          <h3>Coordinates to a person</h3>
+          <p>Named owner, recommended next step, acknowledgement, escalation, resolution,
+          and an append-only audit trail.</p>
+        </div>
+      </div>
+      <div class="callout" style="max-width:900px;">
+        <p class="tiny"><strong>Standing disclaimer.</strong> All data in this prototype is
+        synthetic and generated by a seeded simulator. The prototype executes
+        <strong>no financial transaction</strong>, connects to <strong>no provider system</strong>,
+        and makes <strong>no determination of wrongdoing</strong>. Every risk signal is advisory
+        and requires human review.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 2 · THE PROBLEM ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">The problem</span>
+        <h2>One drawer. Three balances. One question nobody can answer.</h2>
+      </div>
+      <div class="split">
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <p class="lead">An agent shop in a busy market, the afternoon before Eid. It serves
+          <strong>bKash, Nagad and Rocket</strong> customers from a <strong>single physical cash
+          drawer</strong> — but each provider keeps its own e-money balance, on its own system.</p>
+          <p class="lead">Cash-out requests suddenly increase. The agent can inspect each provider
+          separately, and can count the cash box. What the agent cannot do is add those things up
+          into an answer, because they are not the same kind of thing.</p>
+          <div class="callout warn">
+            <p><strong>Then it gets harder.</strong> Most of the pressure is coming from
+            <em>one</em> provider. Several transactions are almost the same amount, from a small
+            group of accounts. That could be ordinary Eid demand, a data problem, or activity a
+            person needs to review — and the shop has no way to tell which.</p>
+          </div>
+          <p class="lead">And when it does go wrong, the agent, the field officer, the provider
+          operations team and the risk reviewer may not know <strong>who should act first</strong>,
+          or how the issue is followed until it is resolved.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span class="kicker">What the agent sees today</span>
+          <div class="grid g3">
+            <div class="card"><h3>bKash</h3><p class="tiny">Own screen. Own balance. Own feed.</p></div>
+            <div class="card"><h3>Nagad</h3><p class="tiny">Own screen. Own balance. Own feed.</p></div>
+            <div class="card"><h3>Rocket</h3><p class="tiny">Own screen. Own balance. Own feed.</p></div>
+          </div>
+          <div class="card danger">
+            <h3>Shared cash drawer</h3>
+            <p class="tiny">One physical balance, drained by every provider's cash-out demand.
+            Not visible on any provider screen.</p>
+          </div>
+          <div class="card" style="border-style:dashed;">
+            <h3 class="dim">The missing question</h3>
+            <p class="tiny">"Will this shop have enough cash <em>and</em> enough of the right
+            provider's e-money to keep serving customers for the next few hours?"</p>
+          </div>
+          <p class="tiny dim">Three separate screens and a cash box do not add up to one
+          operational answer. That gap is the product.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3 · USERS AND ROLES ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Users and roles</span>
+        <h2>Five stakeholders, five different questions</h2>
+      </div>
+      <p class="lead" style="max-width:1000px;">A combined outlet view is permitted. One provider
+      controlling another provider's balance, data or decisions is not. Every screen is built
+      around that line.</p>
+
+      <div class="grid g3" style="margin-top:2px;">
+        <div class="card primary">
+          <h3>Multi-provider agent</h3>
+          <p class="tiny">Sees physical cash and each provider balance together, understands
+          upcoming pressure, and knows what action may be needed — including when to do nothing.</p>
+        </div>
+        <div class="card info">
+          <h3>Provider operations / network coordination</h3>
+          <p class="tiny">Monitors assigned agents, reviews important alerts, contacts the correct
+          agent or field officer, coordinates approved support, and owns the case until closure.</p>
+        </div>
+        <div class="card warn">
+          <h3>Risk or compliance analyst</h3>
+          <p class="tiny">Reviews unusual activity using evidence and context. Operations may
+          escalate a case upward; the platform records review outcomes only, never a conclusion
+          about a person.</p>
+        </div>
+        <div class="card accent">
+          <h3>Financial service provider</h3>
+          <p class="tiny">Understands provider-specific service pressure while provider data,
+          authority and process stay separate. Provider boundaries are enforced in code.</p>
+        </div>
+        <div class="card">
+          <h3>Management</h3>
+          <p class="tiny">Sees area-level service risk, recurring problems and overall operational
+          readiness — the hotspot ranking, not individual customer records.</p>
+        </div>
+        <div class="card" style="border-style:dashed;">
+          <h3 class="dim">Customers</h3>
+          <p class="tiny">The point of all of it: more reliable service from the provider they
+          actually chose. No customer data exists in this prototype.</p>
+        </div>
+      </div>
+
+      <div class="callout accent" style="margin-top:3px;">
+        <p class="tiny">The escalation path modelled by the platform runs
+        <strong>agent/outlet → field officer → area manager → central operations → risk analyst</strong>.
+        Operations never makes a risk judgement; the analyst never sees a raw dashboard without
+        evidence attached.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 4 · CORE INSIGHT ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">The core insight</span>
+        <h2>Cash and e-money move in opposite directions</h2>
+      </div>
+
+      <div class="split">
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <table class="dir">
+            <thead>
+              <tr><th>Customer action</th><th>Shared cash</th><th>That provider's e-money</th></tr>
+            </thead>
+            <tbody>
+              <tr class="hi">
+                <td>Cash-out <span class="tiny dim">takes cash, sends e-money</span></td>
+                <td class="down">↓ decreases</td>
+                <td class="up">↑ increases</td>
+              </tr>
+              <tr>
+                <td>Cash-in <span class="tiny dim">gives cash, takes e-money</span></td>
+                <td class="up">↑ increases</td>
+                <td class="down">↓ decreases</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="tiny dim">Encoded in the simulator as <code>Transaction.cash_delta()</code> and
+          <code>Transaction.emoney_delta()</code> — the sign convention the whole product rests on,
+          not a presentation choice.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="callout">
+            <p><strong>1 · Aggregate health is misleading.</strong> Total value can look
+            comfortable while one provider is hours from exhaustion. A single summed number is an
+            <em>actively dangerous</em> metric, not a simplification. The platform therefore never
+            shows only a total — the per-provider composition sits beside it, always.</p>
+          </div>
+          <div class="callout warn">
+            <p><strong>2 · Cross-provider imbalance is structural, not a bug.</strong> Cash that
+            accumulated from one provider's cash-out cannot be used to replenish another provider's
+            e-money. That is settlement, and it is out of scope — so the platform does not offer it,
+            anywhere, at any confidence level.</p>
+          </div>
+          <div class="callout accent">
+            <p><strong>The guardrail generates the recommendation.</strong> Because conversion is
+            impossible, the only correct remedy is an <strong>approved-channel balance
+            arrangement, before the projected exhaustion time</strong>. The advice follows from the
+            constraint. That is the product.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 5 · ARCHITECTURE ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Architecture</span>
+        <h2>One Python process, one HTML page, no build step</h2>
+      </div>
+
+      <div class="split" style="grid-template-columns:1.25fr .75fr;">
+        <div class="arch">
+          <div class="arch-lane">Synthetic world — owns ground truth</div>
+          <div class="arch-row" style="grid-template-columns:1fr;">
+            <div class="arch-box sim">
+              <span class="t">Simulator <span class="dim">· app/simulator.py</span></span>
+              <span class="s">Seeded RNG — 12 outlets, 4 areas, shared cash + three provider balances,
+              six hours of history, labelled injected episodes</span>
+            </div>
+          </div>
+          <div class="arch-flow">▼ &nbsp;per-provider feeds with <b>independent lag, health and conflict</b></div>
+
+          <div class="arch-lane">Analytics core — pure functions, no I/O, no globals</div>
+          <div class="arch-row" style="grid-template-columns:repeat(4,1fr);">
+            <div class="arch-box ana"><span class="t">liquidity.py</span><span class="s">Theil–Sen slope → exhaustion interval + confidence</span></div>
+            <div class="arch-box ana"><span class="t">anomaly.py</span><span class="s">burst velocity · near-identical amounts · balance-chain reconciliation</span></div>
+            <div class="arch-box ana"><span class="t">quality.py</span><span class="s">feed health → confidence dampening → safe suppression</span></div>
+            <div class="arch-box ana"><span class="t">context.py</span><span class="s">Eid / salary / market calendar → classification + rejected hypotheses</span></div>
+          </div>
+          <div class="arch-flow">▼ &nbsp;<b>quality dampens liquidity and anomaly</b> · context classifies what anomaly found</div>
+
+          <div class="arch-lane">Decision layer</div>
+          <div class="arch-row" style="grid-template-columns:repeat(4,1fr);">
+            <div class="arch-box dec"><span class="t">narrative.py</span><span class="s">deterministic BN/EN assembler</span></div>
+            <div class="arch-box dec"><span class="t">llm.py</span><span class="s">optional rephrasing, disk-cached, unconditional fallback</span></div>
+            <div class="arch-box dec"><span class="t">coordination.py</span><span class="s">route → own → acknowledge → escalate / resolve</span></div>
+            <div class="arch-box dec"><span class="t">hotspot.py · network.py</span><span class="s">area pressure · nearby-provider support · cross-outlet leads</span></div>
+          </div>
+          <div class="arch-flow">▼ &nbsp;<b>engine.py</b> — the one place the layers meet</div>
+
+          <div class="arch-lane">Serve and record</div>
+          <div class="arch-row" style="grid-template-columns:1.4fr 1fr;">
+            <div class="arch-box srv">
+              <span class="t">FastAPI — app/main.py</span>
+              <span class="s">/api/state · /api/simulate · /api/alerts/{id} · /api/alerts/{id}/action ·
+              /api/cases · /api/metrics · /api/export · /healthz</span>
+            </div>
+            <div class="arch-box aud">
+              <span class="t">SQLite · append-only case events</span>
+              <span class="s">case history + evidence pack export</span>
+            </div>
+          </div>
+          <div class="arch-flow">▼ &nbsp;<b>single-page dashboard</b> — vanilla JS, Bengali-first with an EN toggle</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card accent">
+            <h3>Layering rule</h3>
+            <p class="tiny">Analytics modules are pure functions over plain dataclasses — no network,
+            no database, no globals, and nothing in the core imports the engine. Enforced by the
+            import graph, not by convention. This is why the validation harness and the what-if
+            re-run are nearly free.</p>
+          </div>
+          <div class="card info">
+            <h3>One consistent snapshot</h3>
+            <p class="tiny"><code>/api/state</code> returns the whole dashboard in one request.
+            The snapshot is internally consistent by construction; parallel calls could render a
+            torn view where the headline total and the outlet list disagree.</p>
+          </div>
+          <div class="card warn">
+            <h3>Monitoring and observability</h3>
+            <p class="tiny"><code>/healthz</code> liveness (also the cold-start warm-up target) ·
+            <code>/api/metrics</code> precision, recall and false-positive rate against ground
+            truth · offline harness <code>python -m app.validation</code> over five fixed seeds ·
+            every alert carries <code>evidence[]</code>, <code>uncertainty</code>,
+            <code>rejected_hypotheses[]</code>, <code>recommended_steps[]</code>.</p>
+          </div>
+          <div class="card danger">
+            <h3>Provider boundary in the diagram</h3>
+            <p class="tiny">There is no inter-provider arrow — no settlement bus, no shared ledger,
+            no conversion service. Its absence is the design, not an omission.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 6 · LIQUIDITY ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Liquidity intelligence</span>
+        <h2>An interval, honestly earned — never a point estimate</h2>
+      </div>
+
+      <div class="split" style="grid-template-columns:1fr 1fr;">
+        <div class="chart-wrap">
+          <svg viewBox="0 0 520 232" role="img"
+               aria-label="Balance declining with a widening uncertainty band, crossing zero between 2.4 and 4.0 hours, most likely 3.1 hours.">
+            <!-- axes -->
+            <line class="axis" x1="52" y1="18" x2="52" y2="186"/>
+            <line class="axis" x1="52" y1="186" x2="496" y2="186"/>
+            <text class="axis-t" x="14" y="30">balance</text>
+            <text class="axis-t" x="452" y="204">hours ahead →</text>
+            <!-- uncertainty fan -->
+            <polygon class="band" points="62,34 432,186 268,186"/>
+            <!-- central drain line -->
+            <line class="center" x1="62" y1="34" x2="330" y2="186"/>
+            <line class="drain" x1="62" y1="34" x2="330" y2="186"/>
+            <!-- zero crossing marker -->
+            <line class="marker" x1="330" y1="186" x2="330" y2="42"/>
+            <circle class="dot" cx="62" cy="34" r="4.5"/>
+            <text class="note" x="74" y="28">now</text>
+            <text class="note" x="336" y="34">≈3.1 h</text>
+            <text class="note-s" x="336" y="47">most likely exhaustion</text>
+            <!-- interval bracket -->
+            <line class="axis" x1="268" y1="212" x2="432" y2="212"/>
+            <line class="axis" x1="268" y1="206" x2="268" y2="218"/>
+            <line class="axis" x1="432" y1="206" x2="432" y2="218"/>
+            <text class="note-s" x="283" y="228">likely range 2.4 h – 4.0 h</text>
+            <text class="note-s" x="60" y="176">confidence 0.71</text>
+          </svg>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card primary">
+            <h3>How the number is produced</h3>
+            <p class="tiny">A <strong>Theil–Sen robust slope</strong> over a trailing 60-minute
+            window, fitted <strong>separately</strong> for shared cash and for each provider's
+            e-money. A robust estimator is required because a naive mean is destroyed by a single
+            large transaction — precisely the Eid-rush situation the product must survive.</p>
+          </div>
+          <ul class="ticks">
+            <li><b>Interval from the fit, not from a guess.</b> Bounds come from the residual
+            quantiles of the fitted slope (p10/p90), so the band widens where the data is noisy.</li>
+            <li><b>Confidence is a product, not a vibe.</b> Feed freshness × rate variance ×
+            sample size — it degrades honestly instead of asserting false precision.</li>
+            <li><b>Not falling means no number.</b> A stable or rising balance reports
+            "no depletion projected" rather than a figure.</li>
+            <li><b>Already empty reports zero hours</b> remaining, never a negative duration.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="split-even" style="margin-top:2px;">
+        <div class="card warn">
+          <h3>Honest-uncertainty rules, in the product</h3>
+          <p class="tiny">Every projection is rendered as
+          <em class="hl">"exhausted in ~3.1 h (likely 2.4–4.0 h), confidence 0.71"</em> — the shape
+          matters as much as the number. Two floors protect analyst attention: an alert needs
+          confidence ≥ <strong>0.50</strong> and at least <strong>5</strong> data points.
+          Suppressed projections are still <em>shown</em> on the outlet card; they simply raise no
+          alert, because a steep slope fitted through three noisy points is not a finding and
+          flooding the queue with those would cost an analyst the real ones.</p>
+        </div>
+        <div class="card danger">
+          <h3>Withdrawal rule — a failure mode, not a fallback guess</h3>
+          <p class="tiny">When a feed is <strong>conflicting</strong> or <strong>missing</strong>,
+          the liquidity projection is <strong>suppressed entirely</strong> and replaced with a
+          verification notice: <em class="hl">"Provider feed data is unreliable. Verify the feed
+          before acting on any projection for this provider."</em> No recommendation is offered,
+          because offering one would be inventing confidence the data does not support. This path
+          is asserted by tests, not merely documented.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 7 · UNUSUAL ACTIVITY, CLASSIFIED ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Unusual activity, classified — the differentiator</span>
+        <h2>The same chart can mean three different things. The alert says which, and why.</h2>
+      </div>
+
+      <div class="grid g3">
+        <div class="card accent">
+          <h3><span class="pill a">Operational demand spike</span></h3>
+          <p class="tiny"><strong>Velocity up</strong>, and aligned to known context (Eid window,
+          salary days 1–5, market day), and <strong>spread across ≥8 diverse accounts</strong>, and
+          a <strong>broad amount distribution</strong>.</p>
+          <p class="tiny" style="margin-top:6px;color:#9FB3C8;">→ Review priority is suppressed and
+          the benign hypothesis is explained to the user. This is the outcome that keeps the queue
+          trustworthy.</p>
+        </div>
+        <div class="card warn">
+          <h3><span class="pill w">Requires review</span></h3>
+          <p class="tiny"><strong>Velocity up</strong>, and <strong>concentrated in ≤5
+          accounts</strong>, and amounts <strong>near-identical (±2%)</strong>, and
+          <strong>no context alignment</strong>.</p>
+          <p class="tiny" style="margin-top:6px;color:#9FB3C8;">→ Raises an alert with evidence and
+          uncertainty, routed to a person. Advisory language only.</p>
+        </div>
+        <div class="card info">
+          <h3><span class="pill i">Data-quality problem</span></h3>
+          <p class="tiny">The <strong>balance chain fails to reconcile</strong> — declared balance
+          disagrees with the replay of opening balance plus signed transactions.</p>
+          <p class="tiny" style="margin-top:6px;color:#9FB3C8;">→ Routed as <code>data_quality</code>
+          and framed as an integrity fault, <strong>never</strong> as evidence about customer
+          behaviour. An unexplained balance difference must not become a claim against anyone.</p>
+        </div>
+      </div>
+
+      <div class="split" style="grid-template-columns:1.1fr .9fr;margin-top:3px;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="callout">
+            <p><strong>Every alert names the hypotheses it rejected — and why.</strong>
+            Detection emits a <em>classification with reasoning</em>, not a bare score. A "why
+            flagged" panel lists the explanations that were considered and set aside. That single
+            panel is what lets a reviewer argue with the system instead of having to trust it.</p>
+          </div>
+          <div class="card accent">
+            <h3>What the shipped Bengali alert actually says</h3>
+            <p class="bn tiny" style="color:#DCE4EE;font-size:clamp(11px,.92vw,13.5px);">
+              স্বাভাবিকের চেয়ে ভিন্ন ধরনের লেনদেন লক্ষ করা গেছে; বিষয়টি মানুষের পর্যালোচনা প্রয়োজন।
+            </p>
+            <p class="bn tiny" style="margin-top:5px;">
+              সব তথ্য এখনো নিশ্চিত নয় — এটি সাধারণ চাহিদাও হতে পারে। তাই কোনো সিদ্ধান্তের আগে একজন
+              কর্মকর্তার পর্যালোচনা প্রয়োজন।
+            </p>
+            <p class="tiny dim" style="margin-top:6px;">Assembled by <code>narrative.py</code> —
+            situation, uncertainty, then next steps, in Bengali and English. Numbers are rendered
+            directly from the analytics layer and never pass through the language model, so the
+            model is structurally incapable of displaying a wrong figure.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card">
+            <h3>Two detection families, both grounded in the brief</h3>
+            <ul class="ticks" style="margin-top:5px;">
+              <li><b>Burst velocity with near-identical amounts</b> — count of transactions in a
+              trailing <strong>12-minute</strong> window whose amounts fall within
+              <strong>±2%</strong> of one another, from a small set of distinct pseudonymous
+              accounts (ceiling <strong>5</strong>).</li>
+              <li><b>Balance-chain reconciliation failure</b> — <code>balance_after</code> does not
+              reconcile against opening balance plus the sum of signed transactions
+              (tolerance <strong>1%</strong>).</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h3>Fairness is a design requirement here</h3>
+            <p class="tiny">Scoring is <strong>per-outlet against that outlet's own history</strong>,
+            never cross-outlet comparison. A low-volume outlet must not be permanently flagged
+            merely for being small. The cost of that choice is stated plainly on the limitations
+            slide.</p>
+          </div>
+          <div class="card danger">
+            <h3>The control case is the point</h3>
+            <p class="tiny">The simulator plants a <strong>legitimate Eid-window surge</strong>
+            (14 diverse-account cash-outs, broad amount range) specifically to be
+            <strong>not flagged</strong>. A detector that flags it as well as the injected pattern —
+            or that cannot tell them apart — is measuring nothing, and the harness reports it as a
+            false positive.</p>
+          </div>
+        </div>
+      </div>
+      <p class="tiny dim">An unusual pattern is not evidence of wrongdoing. It is a reason for a
+      person to look. Nothing here scores, ranks, names or accuses anyone.</p>
+    </div>
+  </div>
+
+  <!-- ============ 8 · COORDINATION ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Coordination is the point</span>
+        <h2>An alert that ends as a notification has failed</h2>
+      </div>
+      <p class="lead" style="max-width:1020px;">The brief's sharpest line is that important alerts
+      must lead to "a clear and traceable coordination path rather than ending as passive dashboard
+      notifications". So the case, not the chart, is the unit of work.</p>
+
+      <div class="flow" style="margin-top:2px;">
+        <div class="flow-node">
+          <span class="n">Alert raised</span>
+          <span class="v">Kind + severity</span>
+          <span class="d">liquidity · unusual activity · data quality · coordination</span>
+        </div>
+        <div class="flow-sep">▶</div>
+        <div class="flow-node">
+          <span class="n">Routed</span>
+          <span class="v">Provider + area + severity</span>
+          <span class="d">a rule table, not an ad-hoc choice — every severity maps to a named human</span>
+        </div>
+        <div class="flow-sep">▶</div>
+        <div class="flow-node">
+          <span class="n">Owned</span>
+          <span class="v">Role + assignee</span>
+          <span class="d">e.g. field officer FO-1042 · area manager AM-101 · operations OPS-31 · analyst RA-7</span>
+        </div>
+        <div class="flow-sep">▶</div>
+        <div class="flow-node">
+          <span class="n">Acknowledged</span>
+          <span class="v">Someone is on it</span>
+          <span class="d">status moves off "new" only when a person takes it</span>
+        </div>
+        <div class="flow-sep">▶</div>
+        <div class="flow-node">
+          <span class="n">Escalated / Resolved</span>
+          <span class="v">Visible final status</span>
+          <span class="d">notes attach to the case; resolution is recorded, not implied</span>
+        </div>
+      </div>
+
+      <div class="split" style="grid-template-columns:1fr 1fr;margin-top:3px;">
+        <div class="card accent">
+          <h3>Append-only audit trail</h3>
+          <p class="tiny">Every transition — ownership, acknowledgement, escalation, note,
+          resolution — is appended to SQLite with actor, action and timestamp. The dashboard's
+          case panel and <code>/api/cases</code> read from it, and <code>/api/export</code> packages
+          alerts, thresholds, projections, feed status and case history into one downloadable
+          evidence pack, so a reviewer never has to take the dashboard's word for anything.</p>
+        </div>
+        <div class="card primary">
+          <h3>The complete set of actions a case can take</h3>
+          <pre style="margin-top:6px;">VALID_ACTIONS = {"acknowledge", "escalate",
+                 "resolve", "note"}</pre>
+          <p class="tiny" style="margin-top:7px;">There is <strong>no financial verb</strong> in
+          that set. The strongest thing the platform can do is <em>recommend that a human arrange
+          balance through the provider's own approved channel</em>. A test asserts that no banned
+          financial operation verb ever enters this set.</p>
+        </div>
+      </div>
+      <p class="tiny dim">Stated honestly: on the free-tier deployment the audit log lives on
+      ephemeral disk, so a case history does not survive a restart or redeploy. See limitations.</p>
+    </div>
+  </div>
+
+  <!-- ============ 9 · PROVIDER BOUNDARIES ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Provider boundaries</span>
+        <h2>Refused in code, not discouraged in copy</h2>
+      </div>
+
+      <div class="split" style="grid-template-columns:1fr 1fr;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card danger">
+            <h3>Enforced on every case transition</h3>
+            <p class="tiny"><code>coordination.provider_boundary_ok()</code> is consulted before any
+            action is applied. An action whose acting provider differs from the alert's provider
+            raises <code>PermissionError</code>, which the API converts to
+            <strong>HTTP 403</strong> carrying a boundary notice — the dashboard renders it as an
+            explanation, not a generic error. The demo attempts a cross-provider action on purpose
+            and shows the refusal.</p>
+            <p class="tiny" style="margin-top:6px;">Shared physical cash is the one deliberate
+            exception: an alert with no provider tag belongs to no track, so any track may
+            coordinate on it.</p>
+          </div>
+          <div class="card warn">
+            <h3>There is no function to call</h3>
+            <p class="tiny">No code path converts, transfers, settles or refills value between
+            providers. The forbidden financial verbs are kept as a named constant precisely so the
+            guardrail is data that can be asserted against:</p>
+            <pre style="margin-top:6px;">FORBIDDEN_ACTION_VERBS = ("transfer", "refill",
+                          "block", "freeze", "reverse")</pre>
+          </div>
+          <ul class="ticks">
+            <li><b>The unified view is read-only aggregation</b> for the agent. It does not merge
+            wallets, and never presents a blended total as the headline without the per-provider
+            composition beside it.</li>
+            <li><b>Escalation stays inside the provider's own track.</b> A risk analyst receives
+            escalations, but the platform records review outcomes only.</li>
+          </ul>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="callout accent">
+            <p><strong>The guardrail generates the recommendation.</strong> This is the part that
+            makes the constraint productive rather than merely restrictive.</p>
+          </div>
+          <table>
+            <thead><tr><th>The tempting (wrong) move</th><th>What the platform says instead</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Move value from a provider holding surplus into the provider running dry</td>
+                <td><strong>Refused.</strong> That is settlement, and it is out of scope. No such
+                action exists in the code.</td>
+              </tr>
+              <tr>
+                <td>Blend all three balances into one headline and call the outlet healthy</td>
+                <td><strong>Refused.</strong> Composition sits beside the total, always, because
+                the total can look fine while one provider is hours from empty.</td>
+              </tr>
+              <tr class="hi">
+                <td>—</td>
+                <td><strong>Instead:</strong> recommend an approved-channel balance arrangement at
+                the <em>same</em> provider, before the projected exhaustion time — possibly
+                coordinated with a nearby outlet holding headroom <em>in that same provider</em>,
+                discovered by distance.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="tiny dim">Exactly one provider's e-money can be at risk while the aggregate
+          looks fine. Surfacing that — without ever implying one provider may act on another's
+          balance — is the whole trick.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 10 · MEASURED EVIDENCE ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Measured evidence · hard deliverable</span>
+        <h2>Five metrics, measured against planted ground truth — not asserted</h2>
+      </div>
+      <p class="lead" style="max-width:1020px;">Produced by <code>python -m app.validation</code>
+      over seeds <strong>1–5</strong> at <strong>8 outlets × 3 providers</strong>, written to
+      <code>data/metrics.md</code> and <code>data/metrics.json</code>. Every figure below comes from
+      the harness; none is a claim. Narration ran with the LLM disabled, so these numbers involve no
+      network call.</p>
+
+      <div class="grid g3" style="margin-top:2px;">
+        <div class="card primary">
+          <span class="kicker">1 · Shortage detection lead time</span>
+          <p class="figure grad" style="margin-top:3px;">14.76 min</p>
+          <p class="tiny" style="margin-top:3px;">Advance warning at detection, mean and median.
+          <strong>5 of 5</strong> planted shortages detected, <strong>0 missed</strong>. Predicted
+          horizon landed within <strong>0.24 min</strong> of the planted drain rate.</p>
+        </div>
+        <div class="card accent">
+          <span class="kicker">2 · Anomaly precision / recall</span>
+          <p class="figure a" style="margin-top:3px;">1.00 / 1.00</p>
+          <p class="tiny" style="margin-top:3px;">tp 10 · fp 0 · fn 0 against the labelled injected
+          episodes — <strong>5 via the anomaly detector, 5 via data-quality reconciliation</strong>.
+          Precision answers "when we flag, how often are we right"; recall answers "of the cases
+          genuinely planted, how many did we catch".</p>
+        </div>
+        <div class="card warn">
+          <span class="kicker">3 · False positives on legitimate surges</span>
+          <p class="figure w" style="margin-top:3px;">0 of 5</p>
+          <p class="tiny" style="margin-top:3px;">Rate <strong>0.0</strong> on the deliberately
+          injected Eid-window surges — many distinct accounts, wide amount spread — which exist
+          precisely to be <em>not</em> flagged. A detector that flags everything scores perfect
+          recall and fails here.</p>
+        </div>
+        <div class="card info">
+          <span class="kicker">4 · Analytics latency p50 / p95</span>
+          <p class="figure" style="margin-top:3px;color:var(--info);">199–412 ms</p>
+          <p class="tiny" style="margin-top:3px;">Full snapshot rebuild — the call behind
+          <code>GET /api/state</code> — at <strong>200 outlets × 3 providers</strong>
+          (200 drawers + 600 provider balances). That is a <em>range</em>, not a point
+          estimate: five runs on the same host gave p50 between 199 and 412 ms and p95
+          between 250 and 660 ms, so a single number would claim more precision than the
+          measurement has. Per outlet: <strong>0.08–0.23 ms</strong> over n=200.
+          Measured on the real snapshot path, not simulated with a delay.</p>
+        </div>
+        <div class="card accent">
+          <span class="kicker">5 · Alert explanation coverage</span>
+          <p class="figure a" style="margin-top:3px;">1.000</p>
+          <p class="tiny" style="margin-top:3px;">Across <strong>25 alerts</strong>, every one
+          carried a reason, its evidence <em>and</em> an uncertainty statement. This is a
+          completeness invariant rather than a quality measurement, so it is the one figure the
+          harness <strong>asserts</strong> — no alert may reach a user without its reasoning.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--primary);">
+          <h3>Why these are measurable at all</h3>
+          <p class="tiny">The simulator <strong>owns the ground truth</strong> for every injected
+          episode. That is a deliberate design choice, not an incidental one: it is the only reason
+          precision, recall and false-positive rate can be reported as measurements instead of
+          claims. <code>/api/metrics</code> exposes the same computation against the live snapshot.</p>
+        </div>
+      </div>
+
+      <div class="split" style="grid-template-columns:1.15fr .85fr;margin-top:3px;">
+        <div class="card danger">
+          <h3>How to read these honestly — the caveats travel with the numbers</h3>
+          <ul class="ticks no" style="margin-top:5px;">
+            <li><b>Lead time rests on a small, single-shape sample.</b> All five episodes are the
+            same planted Nagad drain at the same outlet across five seeds, so mean = median =
+            min = max. That is one scenario repeated, not five different scenarios, and it is why
+            the harness records n alongside the figure.</li>
+            <li><b>Perfect precision and recall describe this simulator, not production traffic.</b>
+            They measure whether the detectors find what was deliberately injected — they cannot
+            speak to patterns nobody thought to simulate.</li>
+            <li><b>One false-positive family is not a false-positive rate.</b> It is 0 of 5 planted
+            surges, so it establishes the control works; it does not establish a production base
+            rate, which needs a far larger and more varied set of legitimate-demand scenarios.</li>
+            <li><b>Latency is the only machine-dependent figure here.</b> On a quiet host the
+            p50 has been observed anywhere between <strong>199 ms and 412 ms</strong> for the same
+            200-outlet snapshot, depending on what else was running — which is why the card
+            above gives a range. Treat it as an order of magnitude — <em>a few hundred
+            milliseconds for the whole network</em> — not as a benchmark, and re-measure on the
+            deployment target before quoting it there.</li>
+          </ul>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card">
+            <h3>Confusion matrix by detector</h3>
+            <table style="margin-top:5px;">
+              <thead><tr><th>Detector</th><th>Expected</th><th>Detected</th><th>TP</th><th>FP</th><th>FN</th></tr></thead>
+              <tbody>
+                <tr><td><b>anomaly</b></td><td>5</td><td>5</td><td>5</td><td>0</td><td>0</td></tr>
+                <tr><td><b>data quality</b></td><td>5</td><td>5</td><td>5</td><td>0</td><td>0</td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim" style="margin-top:6px;">Detection is never re-implemented in the
+            harness — it counts the alerts the engine actually emitted against the labels the
+            simulator actually planted.</p>
+          </div>
+          <div class="card accent">
+            <h3>Reproduce any number</h3>
+            <pre style="margin-top:5px;">python -m app.validation   <i># writes data/metrics.json + .md</i>
+python -m pytest -q        <i># behavioural guarantees</i></pre>
+            <p class="tiny" style="margin-top:6px;">The simulator is seeded, so a given seed
+            reproduces a given world exactly, and the harness records the seeds and configuration
+            it used alongside the results.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 11 · RESPONSIBLE DESIGN ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Responsible design</span>
+        <h2>Decision support, not surveillance and not enforcement</h2>
+      </div>
+
+      <div class="grid g4">
+        <div class="card primary">
+          <h3>Privacy</h3>
+          <p class="tiny">Every balance, transaction, outlet and account identifier is generated by
+          a seeded simulator; no production API, customer record or provider system is contacted.
+          Accounts are pseudonymous hashes seeded within a run, and there is <strong>no field</strong>
+          for a name, phone number, account number or national ID — so none can be stored even by
+          accident. No credentials are ever requested, stored or transmitted: no PIN, OTP, password
+          or key, and no login at all.</p>
+        </div>
+        <div class="card info">
+          <h3>Human-review boundary</h3>
+          <p class="tiny">Risk signals are advisory. The escalation path runs agent → field officer
+          → area manager → central operations → risk analyst, and <strong>every judgement that
+          matters is made by a person</strong>. The platform records review outcomes; it never
+          records a conclusion about a person's conduct.</p>
+        </div>
+        <div class="card warn">
+          <h3>False positives, treated as engineering</h3>
+          <ul class="ticks" style="margin-top:4px;">
+            <li>An expected demand spike is classified as a spike, not as a concern.</li>
+            <li>A balance mismatch is an <b>integrity fault</b>, never evidence about behaviour.</li>
+            <li>Concentration is judged within the outlet's own baseline — a fairness requirement,
+            not a tuning preference.</li>
+            <li>Confidence and sample-size floors protect analyst attention.</li>
+            <li>Language is enforced by a code-level vocabulary lint, not by good intentions.</li>
+          </ul>
+        </div>
+        <div class="card danger">
+          <h3>Uncertainty, always surfaced</h3>
+          <p class="tiny">Every projection is an interval with a confidence figure, never a bare
+          point estimate. When a feed is conflicting or missing the projection is
+          <strong>withdrawn</strong> and replaced with a verification notice. A degraded feed must
+          never silently produce a confident conclusion — and that is tested, not just stated.
+          Confidence multipliers: fresh ×1.00, delayed ×0.80, stale ×0.50, conflicting ×0.30,
+          missing ×0.00.</p>
+        </div>
+      </div>
+
+      <div class="split-even" style="margin-top:3px;">
+        <div class="card" style="border-left:3px solid var(--danger);">
+          <h3>What the prototype intentionally does not do</h3>
+          <ul class="ticks no" style="margin-top:5px;">
+            <li>Real interoperability, settlement or conversion between bKash, Nagad, Rocket or any
+            other wallet.</li>
+            <li>Access to production APIs, real customer identities, real balances or real
+            transaction accounts.</li>
+            <li>Automatic blocking, accusation, disciplinary action or any final determination about
+            a person.</li>
+            <li>Unauthorised cash movement, wallet refill, transfer, recovery or reversal.</li>
+            <li>Collection of credentials, PINs, OTPs, passwords or private authentication data.</li>
+            <li>Any claim of regulatory approval or production readiness.</li>
+          </ul>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="callout">
+            <p><strong>An unusual pattern is not proof of anything.</strong> No output of this
+            platform determines wrongdoing, accuses any person, blocks any transaction, or moves
+            any money. The platform is not a risk-scoring engine and not an enforcement mechanism.</p>
+          </div>
+          <div class="card">
+            <h3>Regulatory position, stated plainly</h3>
+            <p class="tiny">This is a prototype built for a hackathon, using synthetic data only. It
+            has not been reviewed or approved by any regulator and is not connected to any financial
+            infrastructure. Nothing in it should be read as a claim of compliance with any
+            regulatory framework, nor as evidence that the approach is ready for production.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 12 · DATA AND SIMULATION ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Data and simulation · 20% of the score</span>
+        <h2>Ground truth is planted on purpose — it is the only reason metrics exist</h2>
+      </div>
+
+      <div class="split" style="grid-template-columns:1fr 1.15fr;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="card accent">
+            <h3>How the world is built</h3>
+            <ul class="ticks ok" style="margin-top:5px;">
+              <li><b>12 outlets</b> across four real areas — Sylhet/Zindabazar, Dhaka/Mirpur,
+              Chattogram/Agrabad, Rajshahi/Boalia — each with coordinates, so distance-based support
+              discovery is a real calculation rather than a label.</li>
+              <li><b>One shared cash balance</b> per outlet (৳45,000–160,000) and <b>three
+              independent provider balances</b> — bKash, Nagad, Rocket — opening between ৳40,000 and
+              ৳190,000, with separate feed timestamps and separate feed health.</li>
+              <li><b>Six hours of history in 18 steps</b> on an afternoon-weighted demand curve, for
+              the pre-Eid market scenario. <b>62% of transactions are cash-out</b> — the direction
+              that empties the drawer while growing provider e-money.</li>
+              <li><b>Identifiers are seeded pseudonyms</b> (<code>h0123</code>), stable within a run
+              so burst and relationship analysis work, and derived from no real person.</li>
+              <li><b>No future-dated transactions</b> — anything stamped after <code>now</code> is
+              dropped, so the trailing window can never manufacture an upward slope from data that
+              has not happened yet.</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h3>Assumptions, stated as assumptions</h3>
+            <p class="tiny">Demand is diurnal and locally peaked · providers are logically separate
+            systems with no shared ledger and no synchronisation between them · cash-out dominates
+            under pressure because that is the direction that produces a service failure · feed
+            faults are per-provider, not per-outlet, which is what makes the degraded-data fallback
+            meaningful. And thresholds are judgement calls, not constants of nature: all of them
+            live in <code>app/config.py</code> so they can be inspected and challenged.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span class="kicker">Injected scenarios and their recorded labels</span>
+          <table>
+            <thead><tr><th>Scenario</th><th>Planted condition</th><th>Label</th></tr></thead>
+            <tbody>
+              <tr class="hi">
+                <td><b>A</b> — hidden provider shortage</td>
+                <td>Nagad e-money drains hard (8 × ৳2,100 cash-in) while shared cash stays healthy.
+                Total value looks fine; one provider is hours from empty.</td>
+                <td><span class="pill p">liquidity</span></td>
+              </tr>
+              <tr>
+                <td><b>B</b> — pattern requiring review</td>
+                <td>9 near-identical cash-outs (৳9,900, spread ~1.8%) from 4 accounts inside
+                12 minutes.</td>
+                <td><span class="pill w">anomaly</span></td>
+              </tr>
+              <tr>
+                <td><b>B2</b> — the control</td>
+                <td>14 diverse-account cash-outs with a broad amount range during an Eid window. A
+                <em>legitimate</em> surge that must <b>not</b> be flagged.</td>
+                <td><span class="pill a">demand_spike</span></td>
+              </tr>
+              <tr>
+                <td><b>C</b> — data inconsistency</td>
+                <td>Declared balance exceeds the reconciled chain by ৳25,000 — an integrity fault,
+                explicitly not a behaviour signal.</td>
+                <td><span class="pill i">data_quality</span></td>
+              </tr>
+              <tr>
+                <td><b>Feed fault</b></td>
+                <td>One provider feed goes stale; another is marked conflicting.</td>
+                <td><span class="pill">reliability</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout">
+            <p class="tiny"><strong>Scenario A is the headline case, and it is built to be
+            misleading by construction.</strong> Scenario B2 is the control. A detector that flags
+            B2 as well as B, or that cannot tell the two apart, is not measuring anything — and the
+            harness reports it as a false positive. That is why the control exists at all.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 13 · LIMITATIONS AND NEXT STEPS ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content body">
+      <div class="shead">
+        <span class="kicker">Limitations and next steps</span>
+        <h2>What this prototype is not, and what we would build next</h2>
+      </div>
+
+      <div class="split" style="grid-template-columns:1.1fr .9fr;">
+        <div style="display:flex;flex-direction:column;gap:9px;">
+          <div class="grid g2">
+            <div class="card danger">
+              <h3>Validation limits</h3>
+              <p class="tiny">Ground truth is <strong>planted, not observed</strong>. Precision and
+              recall measure whether the detector finds what the simulator deliberately injected —
+              a genuine measurement of the detector, but it cannot tell us how it behaves against
+              patterns nobody thought to simulate, least of all patterns designed to evade these
+              specific rules.</p>
+            </div>
+            <div class="card danger">
+              <h3>One control case</h3>
+              <p class="tiny">The false-positive check rests on a single legitimate-demand control.
+              Salary-day and market-day contexts are handled, but a production system would need
+              many more legitimate scenarios before a false-positive rate could be quoted with any
+              confidence.</p>
+            </div>
+            <div class="card warn">
+              <h3>Not calibrated to real traffic</h3>
+              <p class="tiny">Absolute transaction counts and amounts are plausible but derive from
+              no published dataset. The analytics are validated for <strong>internal consistency and
+              detection behaviour</strong>, not for accuracy against real Bangladeshi agent
+              traffic.</p>
+            </div>
+            <div class="card warn">
+              <h3>Per-agent baselines miss thin network patterns</h3>
+              <p class="tiny">Per-outlet baselining is the right fairness call, but a network-wide
+              pattern spread thinly across many individually unremarkable outlets would not be
+              caught. The relationship view that partially covers this is a lead for a human, never
+              a finding.</p>
+            </div>
+          </div>
+          <div class="card danger">
+            <h3>Deployment and operational limits, stated honestly</h3>
+            <p class="tiny"><strong>Case history is transient.</strong> On the free tier the append-only
+            audit log lives on ephemeral disk, so acknowledgements, escalations, notes and
+            resolutions taken during a demo are lost on restart or redeploy. Every generated value is
+            recomputed from the seed on startup, so the dashboard always renders correctly — but the
+            coordination record is not durable. In any real deployment the audit trail is a
+            compliance artifact and would require a managed database with the append-only table
+            replicated off the container; that is a connection string in <code>app/config.py</code>,
+            a deployment decision rather than an architectural one.</p>
+            <p class="tiny" style="margin-top:6px;">Also: <strong>single instance</strong>, no
+            autoscaling, no failover, no SLA, a <strong>~50 second cold start</strong> on the free
+            tier, and a <strong>public URL with no authentication</strong> — acceptable only because
+            every byte of data is synthetic and there is nothing private to protect. It would not be
+            acceptable with real data. The what-if demand multiplier is
+            <strong>first-order</strong>: it scales the drain rate and inverts the exhaustion time,
+            but does not model customers switching providers, queueing, or leaving.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px;">
+          <span class="kicker">Next steps, in the order we would do them</span>
+          <div class="card accent">
+            <h3>1 · Durable audit</h3>
+            <p class="tiny">Move the append-only case-event table to a managed database so the
+            coordination record survives a deploy. This is the single biggest gap between the
+            prototype and something an operations team could rely on.</p>
+          </div>
+          <div class="card accent">
+            <h3>2 · Widen the control set</h3>
+            <p class="tiny">Add legitimate salary-day, market-day, festival and remittance-window
+            scenarios so the false-positive rate is measured against a realistic base rate rather
+            than one control case — and report it as a rate, with its denominator.</p>
+          </div>
+          <div class="card accent">
+            <h3>3 · Calibrate against real distributions</h3>
+            <p class="tiny">Replace plausible-but-invented volumes with real aggregate distributions
+            through a privacy-preserving, provider-side process — never by importing customer-level
+            data into the prototype. Only then does an absolute number mean anything.</p>
+          </div>
+          <div class="card accent">
+            <h3>4 · Close the feedback loop</h3>
+            <p class="tiny">Let reviewer outcomes — confirmed, dismissed, inconclusive — flow back
+            into threshold tuning. Right now <code>app/config.py</code> is the only feedback
+            channel, and it is a human editing a file.</p>
+          </div>
+          <div class="card accent">
+            <h3>5 · Operational hardening</h3>
+            <p class="tiny">Authentication with role-scoped views, real persistence, more than one
+            instance, and streaming updates instead of snapshot polling at higher outlet counts.</p>
+          </div>
+          <div class="callout">
+            <p class="tiny">Deliberately <strong>not</strong> on this list: any step toward executing
+            or automating a financial action. The advisory boundary is the design, not a stage we
+            intend to grow out of.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 14 · CLOSE ============ -->
+  <div class="slide">
+    <div class="stamp">Synthetic data · <b>advisory only</b></div>
+    <div class="slide-content" style="gap:20px;">
+      <span class="kicker">The one-sentence argument</span>
+      <h2 style="max-width:1000px;font-size:clamp(21px,2.5vw,36px);line-height:1.3;">
+        Three provider balances behind one cash drawer cannot be managed by a single number —
+        so the platform projects each balance separately, <em class="hl">says how sure it is</em>,
+        names the hypotheses it rejected, and routes the case to a person who can act
+        <em class="hl">before the drawer runs dry</em>.
+      </h2>
+
+      <div class="grid g3" style="max-width:980px;margin-top:4px;">
+        <div class="card primary">
+          <h3>Understands the problem</h3>
+          <p class="tiny">Multi-provider operations, five distinct roles, provider boundaries
+          enforced in code, and assumptions documented rather than hidden.</p>
+        </div>
+        <div class="card accent">
+          <h3>Wins on the decision</h3>
+          <p class="tiny">Unified liquidity, classified unusual activity, and a coordination path
+          that ends in a named owner and a visible status — not a notification.</p>
+        </div>
+        <div class="card warn">
+          <h3>Honest about the rest</h3>
+          <p class="tiny">Intervals not point estimates, suppressed projections instead of guesses,
+          a control case guarding the detector, and limitations stated in full.</p>
+        </div>
+      </div>
+
+      <div class="callout accent" style="max-width:1000px;">
+        <p class="tiny">An unusual pattern is not proof of anything. This prototype executes
+        <strong>no financial transaction</strong>, connects to <strong>no provider system</strong>,
+        requests <strong>no credentials</strong>, and makes <strong>no determination about any
+        person</strong>. All data is synthetic. Every risk signal is advisory and requires human
+        review.</p>
+      </div>
+
+      <p class="eyebrow" style="margin-top:2px;">Thank you — questions welcome</p>
+    </div>
+  </div>
+
+</div><!-- /.slide-deck -->
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()" aria-label="Previous slide">&#8592;</button>
+  <span class="slide-counter"><span id="current">1</span> / <span id="total">14</span></span>
+  <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide">&#8594;</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var total = slides.length;
+  var current = 1;
+
+  var currentEl = document.getElementById("current");
+  var totalEl = document.getElementById("total");
+  var progressBar = document.getElementById("progressBar");
+
+  totalEl.textContent = String(total);
+
+  function showSlide(n) {
+    if (n < 1) { n = 1; }
+    if (n > total) { n = total; }
+    current = n;
+    for (var i = 0; i < slides.length; i++) {
+      if (i === n - 1) {
+        slides[i].classList.add("active");
+      } else {
+        slides[i].classList.remove("active");
+      }
+    }
+    currentEl.textContent = String(n);
+    progressBar.style.width = (n / total * 100) + "%";
+  }
+
+  window.nextSlide = function () { showSlide(current + 1); };
+  window.prevSlide = function () { showSlide(current - 1); };
+  window.showSlide = showSlide;
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+      e.preventDefault();
+      showSlide(current + 1);
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault();
+      showSlide(current - 1);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      showSlide(1);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      showSlide(total);
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (e.target.closest(".nav-controls")) { return; }
+    if (window.getSelection && String(window.getSelection()).length > 0) { return; }
+    showSlide(current + 1);
+  });
+
+  showSlide(1);
+})();
+</script>
+</body>
+</html>

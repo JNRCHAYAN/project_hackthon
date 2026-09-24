@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: project-hackthon
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # Set this in the Render dashboard only — never commit it.
+      # Omit it entirely to run template-only narration.
+      - key: ANTHROPIC_AUTH_TOKEN
+        sync: false

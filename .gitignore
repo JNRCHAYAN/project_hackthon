@@ -23,3 +23,6 @@ data/metrics.json
 .DS_Store
 Thumbs.db
 .idea/
+
+# Local harness settings (may carry machine-specific permissions)
+.claude/settings.local.json

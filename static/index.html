@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liquidity &amp; Risk Intelligence — Agent Network</title>
+<meta name="description" content="Liquidity, data-quality and coordination intelligence for a mobile-money agent network. All data is synthetic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23101426'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='%23f2a63b' font-family='sans-serif'>&%231535;</text></svg>">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="masthead">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">৳</span>
+    <div class="brand-text">
+      <h1>Liquidity &amp; Risk Intelligence</h1>
+      <p>Agent network · Bangladesh · <span class="synthetic">synthetic data</span></p>
+    </div>
+  </div>
+
+  <div class="controls" role="group" aria-label="View controls">
+    <div class="field">
+      <label for="scenario">Scenario</label>
+      <select id="scenario">
+        <option value="baseline">Baseline network</option>
+        <option value="A">A — provider liquidity</option>
+        <option value="B">B — needs review</option>
+        <option value="B2">B2 — demand spike</option>
+        <option value="C">C — data quality</option>
+      </select>
+    </div>
+    <button id="lang-toggle" class="btn btn-quiet" type="button"
+            aria-pressed="true" title="Switch language">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"/></svg>
+      <span id="lang-label">বাংলা</span>
+    </button>
+    <a id="export" class="btn btn-quiet" href="/api/export" download
+       title="Download the full evidence pack as JSON">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      <span data-i18n="export">Evidence pack</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- Scenario focus: names the story and, for B2, says why doing nothing is correct. -->
+  <section id="focus" class="focus" aria-live="polite"></section>
+
+  <!-- Network summary -->
+  <section class="rail" id="kpis" aria-label="Network summary"></section>
+
+  <!-- Alert queue drives the detail panel beside it. -->
+  <div class="split">
+    <section class="panel" aria-labelledby="queue-h">
+      <div class="panel-head">
+        <h2 id="queue-h" data-i18n="alertQueue">Alert queue</h2>
+        <span class="count" id="queue-count"></span>
+      </div>
+      <div id="queue" role="list"></div>
+    </section>
+
+    <section class="panel panel-detail" id="detail" aria-labelledby="detail-h"
+             aria-live="polite">
+      <h2 id="detail-h" class="sr-only">Alert detail</h2>
+    </section>
+  </div>
+
+  <!-- The signature view: every balance as a runway to the horizon. -->
+  <section class="panel" aria-labelledby="runways-h">
+    <div class="panel-head">
+      <h2 id="runways-h" data-i18n="runways">Balance runways</h2>
+      <div class="legend" aria-label="Legend">
+        <span class="key"><i class="sw cash"></i><span data-i18n="cash">Cash</span></span>
+        <span class="key"><i class="sw float"></i><span data-i18n="emoney">E-money</span></span>
+        <span class="key"><i class="sw band"></i><span data-i18n="uncertainty">Estimate range</span></span>
+      </div>
+    </div>
+    <div id="outlets"></div>
+  </section>
+
+  <div class="grid-2">
+    <section class="panel" aria-labelledby="map-h">
+      <div class="panel-head">
+        <h2 id="map-h" data-i18n="hotspotMap">Coverage &amp; hotspots</h2>
+        <span class="count" id="map-count"></span>
+      </div>
+      <div id="map" class="map-wrap"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="areas-h">
+      <div class="panel-head"><h2 id="areas-h" data-i18n="areas">Areas by pressure</h2></div>
+      <div id="areas"></div>
+      <div id="support" class="support"></div>
+    </section>
+  </div>
+
+  <div class="grid-2">
+    <section class="panel" aria-labelledby="net-h">
+      <div class="panel-head">
+        <h2 id="net-h" data-i18n="network">Cross-outlet relationships</h2>
+      </div>
+      <div id="network"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="wi-h">
+      <div class="panel-head"><h2 id="wi-h" data-i18n="whatif">What-if</h2></div>
+      <div id="whatif"></div>
+      <div id="metrics" class="metrics"></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="audit-h">
+    <div class="panel-head">
+      <h2 id="audit-h" data-i18n="audit">Case history</h2>
+      <span class="count" data-i18n="appendOnly">append-only</span>
+    </div>
+    <div id="audit"></div>
+  </section>
+
+  <footer class="foot">
+    <p data-i18n="footnote">Advisory only. Nothing here determines wrongdoing,
+      blocks a transaction, or moves value between providers. Every figure is
+      computed from a seeded simulation; no real balances or identities are used.</p>
+  </footer>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
