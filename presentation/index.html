@@ -935,19 +935,19 @@ td.down{color:var(--danger);font-weight:600;}
         </div>
         <div class="card info">
           <span class="kicker">4 · Analytics latency p50 / p95</span>
-          <p class="figure" style="margin-top:3px;color:var(--info);">199–412 ms</p>
+          <p class="figure" style="margin-top:3px;color:var(--info);">187–412 ms</p>
           <p class="tiny" style="margin-top:3px;">Full snapshot rebuild — the call behind
           <code>GET /api/state</code> — at <strong>200 outlets × 3 providers</strong>
           (200 drawers + 600 provider balances). That is a <em>range</em>, not a point
-          estimate: five runs on the same host gave p50 between 199 and 412 ms and p95
-          between 250 and 660 ms, so a single number would claim more precision than the
-          measurement has. Per outlet: <strong>0.08–0.23 ms</strong> over n=200.
+          estimate: six runs on the same host gave p50 between 187 and 412 ms and p95
+          between 200 and 660 ms, so a single number would claim more precision than the
+          measurement has. Per outlet: <strong>0.08–0.10 ms</strong> over n=200.
           Measured on the real snapshot path, not simulated with a delay.</p>
         </div>
         <div class="card accent">
           <span class="kicker">5 · Alert explanation coverage</span>
           <p class="figure a" style="margin-top:3px;">1.000</p>
-          <p class="tiny" style="margin-top:3px;">Across <strong>25 alerts</strong>, every one
+          <p class="tiny" style="margin-top:3px;">Across <strong>30 alerts</strong>, every one
           carried a reason, its evidence <em>and</em> an uncertainty statement. This is a
           completeness invariant rather than a quality measurement, so it is the one figure the
           harness <strong>asserts</strong> — no alert may reach a user without its reasoning.</p>
@@ -976,7 +976,7 @@ td.down{color:var(--danger);font-weight:600;}
             surges, so it establishes the control works; it does not establish a production base
             rate, which needs a far larger and more varied set of legitimate-demand scenarios.</li>
             <li><b>Latency is the only machine-dependent figure here.</b> On a quiet host the
-            p50 has been observed anywhere between <strong>199 ms and 412 ms</strong> for the same
+            p50 has been observed anywhere between <strong>187 ms and 412 ms</strong> for the same
             200-outlet snapshot, depending on what else was running — which is why the card
             above gives a range. Treat it as an order of magnitude — <em>a few hundred
             milliseconds for the whole network</em> — not as a benchmark, and re-measure on the
@@ -1163,7 +1163,8 @@ python -m pytest -q        <i># behavioural guarantees</i></pre>
               </tr>
               <tr>
                 <td><b>Feed fault</b></td>
-                <td>One provider feed goes stale; another is marked conflicting.</td>
+                <td>Four provider feeds are degraded, one per outlet: one stale, one late,
+                one absent entirely, one conflicting with the ledger.</td>
                 <td><span class="pill">reliability</span></td>
               </tr>
             </tbody>
@@ -1225,9 +1226,13 @@ python -m pytest -q        <i># behavioural guarantees</i></pre>
             <h3>Deployment and operational limits, stated honestly</h3>
             <p class="tiny"><strong>Case history is transient.</strong> On the free tier the append-only
             audit log lives on ephemeral disk, so acknowledgements, escalations, notes and
-            resolutions taken during a demo are lost on restart or redeploy. Every generated value is
-            recomputed from the seed on startup, so the dashboard always renders correctly — but the
-            coordination record is not durable. In any real deployment the audit trail is a
+            resolutions taken during a demo are lost when that disk goes — a redeploy, or a free-tier
+            restart that recycles the container. Within a running process they hold: a case keeps its
+            status across a world rebuild, and a fresh process re-reads the trail to recover it, so
+            the ledger and the case list never disagree. What is <em>not</em> durable is the disk
+            itself. Every generated value is recomputed from the seed on startup, so the dashboard
+            always renders correctly — but the coordination record does not outlive the container.
+            In any real deployment the audit trail is a
             compliance artifact and would require a managed database with the append-only table
             replicated off the container; that is a connection string in <code>app/config.py</code>,
             a deployment decision rather than an architectural one.</p>

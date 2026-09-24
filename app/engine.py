@@ -126,6 +126,11 @@ class Engine:
         # but a human's decision about an alert must not be. open_case() is what
         # honours this, by reading self._cases when it re-creates an alert.
         self._cases: dict[str, tuple[CaseStatus, str, str]] = {}
+        # A rebuild is not the only thing that forgets: so does a process
+        # restart, which would leave the audit trail intact and every case
+        # reset to NEW. The trail is the durable record, so recover from it.
+        for _aid, _status in self.audit.resumed_states().items():
+            self._cases[_aid] = (_status, "", "")
         self.alerts: dict[str, Alert] = {}
         self.snapshot: dict = {}
         self.rebuild()

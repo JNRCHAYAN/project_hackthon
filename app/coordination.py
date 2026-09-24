@@ -255,6 +255,27 @@ class AuditLog:
             "ORDER BY seq DESC LIMIT ?", (limit,)).fetchall()
         return [dict(zip(self._COLUMNS, row)) for row in rows]
 
+    def resumed_states(self) -> dict:
+        """The status each case was left in, derived from the durable trail.
+
+        The log is the permanent record, so it is also the place to recover
+        from. Without this, restarting the process kept the whole audit trail
+        but reset every case to NEW — so a reviewer saw a case marked new
+        sitting next to a trail showing it had been acknowledged, which is
+        exactly the kind of self-contradiction this product exists to avoid.
+
+        Notes do not move a case, so they are skipped; the last
+        status-changing event wins.
+        """
+        rows = self._conn.execute(
+            "SELECT alert_id, action FROM case_events ORDER BY seq").fetchall()
+        states: dict[str, CaseStatus] = {}
+        for alert_id, action in rows:
+            status = _ACTION_STATUS.get(action)
+            if status is not None:
+                states[alert_id] = status
+        return states
+
     def close(self) -> None:
         if self._conn is not None:
             self._conn.close()

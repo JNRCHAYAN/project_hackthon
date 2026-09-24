@@ -157,8 +157,10 @@
       lowConf: 'কম আস্থা',
       unitHoursShort: 'ঘ',
       feedFresh: 'তাজা',
+      feedDelayed: 'দেরি',
       feedStale: 'বিলম্বিত',
       feedConflicting: 'পরস্পরবিরোধী',
+      feedMissing: 'ফিড নেই',
       feedAge: 'মিনিট আগে',
       noProjection: '—',
 
@@ -379,8 +381,10 @@
       lowConf: 'low confidence',
       unitHoursShort: 'h',
       feedFresh: 'fresh',
+      feedDelayed: 'delayed',
       feedStale: 'stale',
       feedConflicting: 'conflicting',
+      feedMissing: 'missing',
       feedAge: 'min ago',
       noProjection: 'n/a',
 
@@ -485,9 +489,13 @@
                     medium: 'sev-medium', low: 'sev-low' };
   var CLS_TAG = { needs_review: 'review', data_quality: 'dq',
                   demand_spike: 'spike', coordination: 'coord' };
-  // Feed health reuses the tag palette so stale and conflicting feeds are
-  // visibly not fresh: amber = stale, red = conflicting, no badge = fresh.
-  var FEED_TAG = { stale: 'dq', conflicting: 'review' };
+  // Feed health reuses the tag palette so a degraded feed is visibly not
+  // fresh: amber for a feed that is merely late (delayed, stale), red for one
+  // that cannot be trusted at all (conflicting, missing), no badge for fresh.
+  // The two states sharing a colour are told apart by their label and the age
+  // beside it, which is the part a user actually reads.
+  var FEED_TAG = { delayed: 'dq', stale: 'dq',
+                   conflicting: 'review', missing: 'review' };
 
   /* ------------------------------------------------------- state + helpers */
 
@@ -688,8 +696,10 @@
 
   function feedLabel(status) {
     if (status === 'fresh') return t('feedFresh');
+    if (status === 'delayed') return t('feedDelayed');
     if (status === 'stale') return t('feedStale');
     if (status === 'conflicting') return t('feedConflicting');
+    if (status === 'missing') return t('feedMissing');
     return String(status || t('unknown'));
   }
 

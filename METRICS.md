@@ -20,8 +20,8 @@ at 200 outlets × 3 providers (200 shared-cash drawers + 600 provider balances).
 | 2 | **Predicted-horizon error** | **0.24 min** mean absolute error | How close the projection lands to the true exhaustion time |
 | 3 | **Anomaly precision / recall** | **1.00 / 1.00** (tp 10, fp 0, fn 0) | Whether flags are right, and whether real patterns are caught |
 | 4 | **False-positive rate on legitimate surges** | **0.0** — 0 of 5 planted Eid-window surges flagged | A detector that flags everything scores perfect recall and fails here |
-| 5 | **Analytics latency (p50 / p95)** | **p50 199–412 ms, p95 250–660 ms** full snapshot at 200 outlets × 3 providers; **0.08–0.23 ms** per outlet | Responsiveness at a documented volume |
-| 6 | **Alert explanation coverage** | **1.000** across 25 alerts | No alert reaches a user without reason, evidence and uncertainty |
+| 5 | **Analytics latency (p50 / p95)** | **p50 187–412 ms, p95 200–660 ms** full snapshot at 200 outlets × 3 providers; **0.08–0.10 ms** per outlet | Responsiveness at a documented volume |
+| 6 | **Alert explanation coverage** | **1.000** across 30 alerts | No alert reaches a user without reason, evidence and uncertainty |
 
 ### Confusion matrix, by detector family
 
@@ -49,11 +49,12 @@ genuine measurement of lead time for that one scenario; it is **not** a distribu
 across five independent shortage scenarios. Treat n as 1, not 5.
 
 **Latency is the only non-deterministic figure in the report.** It was measured on
-the host that ran the harness, and repeated runs on that same host have produced
-p50 values between **199 ms and 412 ms** and p95 values between **250 ms and
-660 ms** for the identical 200-outlet snapshot, depending on what else was
-running. That is why the table gives a range rather than a point estimate: a
-single run would look more precise than the measurement actually is. Read it as
+the host that ran the harness, and six runs on that same host have produced p50
+values between **187 ms and 412 ms** and p95 values between **200 ms and 660 ms**
+for the identical 200-outlet snapshot, depending on what else was running. That
+is why the table gives a range rather than a point estimate: a single run would
+look more precise than the measurement actually is, and the range has widened
+every time it has been re-measured rather than converging. Read it as
 *a few hundred milliseconds to rebuild the whole network*, and re-measure on the
 deployment target before quoting a number there. The measurement is against the
 real snapshot path — not simulated with a `sleep`.

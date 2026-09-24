@@ -192,13 +192,20 @@ def _confusion(snapshot: dict) -> dict:
     and a detected finding is an ``(outlet, kind)`` pair from the alerts the
     engine emitted. Only the pairing is mirrored — the detection itself is the
     engine's, taken straight from its alert list.
+
+    A withdrawn projection is excluded, exactly as the engine excludes it: an
+    alert saying a feed cannot be trusted is a statement about data integrity,
+    not a finding about activity. Counting it here while the engine does not
+    would publish a false positive the engine never claimed, and would break
+    the ``agrees_with_matrix`` invariant below — which is the whole point of
+    carrying both numbers side by side.
     """
     counts: dict[str, dict[str, int]] = {}
     for label in ("anomaly", "data_quality"):
         expected = {e["outlet_id"] for e in snapshot["episodes"]
                     if e["label"] == label}
         detected = {a["outlet_id"] for a in snapshot["alerts"]
-                    if a["kind"] == label}
+                    if a["kind"] == label and not a.get("feed_withdrawn")}
         counts[label] = {
             "expected": len(expected),
             "detected": len(detected),

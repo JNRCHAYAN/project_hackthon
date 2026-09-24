@@ -47,7 +47,7 @@ than asserted.
 | **B** | 9 near-identical cash-outs (৳9,900, spread ~1.8%) from 4 accounts inside 12 minutes | `anomaly` |
 | **B2** | 14 diverse-account cash-outs with a broad amount range during an Eid window — a *legitimate* surge that must **not** be flagged | `demand_spike` |
 | **C** | Declared balance exceeds the reconciled chain by ৳25,000 — a data-integrity fault, explicitly not suspicion | `data_quality` |
-| **Feed fault** | One provider feed goes stale; another is marked conflicting | `reliability` |
+| **Feed fault** | Four provider feeds are degraded, one per outlet: one stale, one late but not yet stale, one absent entirely, one conflicting with the ledger. No episode is recorded — a feed that never arrived is not activity, so there is nothing for a detector to find or miss | `reliability` |
 
 Scenario A is the headline case: aggregate health is misleading by construction.
 Scenario B2 is the control. A detector that flags B2 as well as B — or that fails

@@ -6,6 +6,7 @@ labelled with the truth about what was planted in it.
 """
 from app.config import SETTINGS
 from app.domain import FeedStatus, TxnType
+from app.quality import DELAYED_AFTER_S, STALE_AFTER_S, classify_feed
 from app.simulator import MINUTE, PROVIDERS, Simulator
 
 ALLOWED_LABELS = {"anomaly", "demand_spike", "data_quality"}
@@ -341,9 +342,9 @@ def test_one_outlet_has_a_stale_nagad_feed():
     assert 44 * MINUTE <= age <= 46 * MINUTE, f"expected ~45 min stale, got {age}"
 
 
-def test_only_two_feeds_are_unhealthy():
-    """Fresh feeds everywhere except the planted stale one and scenario C."""
-    sim = Simulator(seed=11, outlets=6)
+def test_only_the_planted_feeds_are_unhealthy():
+    """Fresh feeds everywhere except the planted feed faults."""
+    sim = Simulator(seed=11, outlets=8)
     world = sim.world()
     unhealthy = {(outlet_id, pid): pos.feed_status
                  for outlet_id, state in world.items()
@@ -352,9 +353,86 @@ def test_only_two_feeds_are_unhealthy():
     assert unhealthy == {
         (_outlet(world, 3), "bkash"): FeedStatus.CONFLICTING,
         (_outlet(world, 4), "nagad"): FeedStatus.STALE,
+        (_outlet(world, 5), "rocket"): FeedStatus.DELAYED,
+        (_outlet(world, 6), "bkash"): FeedStatus.MISSING,
     }
     for outlet_id, state in world.items():
         for pid, pos in state.positions.items():
             healthy = (outlet_id, pid) not in unhealthy
             if healthy:
                 assert sim.now - pos.last_feed_at <= 45 * MINUTE
+
+
+def test_one_world_reaches_every_feed_state():
+    """All five rungs of the ladder, from one ordinary world.
+
+    Two of them — delayed and missing — used to be unreachable: nothing ever
+    produced a feed that was late without being stale, or one that was absent
+    entirely, so half the fallback ladder could not be demonstrated at all.
+    """
+    sim = Simulator(seed=11, outlets=8)
+    world = sim.world()
+    planted: dict[FeedStatus, list[tuple[str, str]]] = {}
+    for outlet_id, state in world.items():
+        for pid, pos in state.positions.items():
+            planted.setdefault(pos.feed_status, []).append((outlet_id, pid))
+
+    assert set(planted) == set(FeedStatus), "a feed state is unreachable"
+    degraded = [FeedStatus.DELAYED, FeedStatus.STALE, FeedStatus.CONFLICTING,
+                FeedStatus.MISSING]
+    for status in degraded:
+        planted_times = len(planted[status])
+        assert planted_times == 1, f"{status} planted {planted_times}x"
+    # One fault per outlet, so each degraded outlet keeps two honest feeds to
+    # be read against rather than three untrustworthy ones.
+    assert len({outlet_id for status in degraded
+                for outlet_id, _ in planted[status]}) == len(degraded)
+
+
+def test_every_planted_feed_status_is_the_one_the_classifier_derives():
+    """The plants are reachable states, not just labels.
+
+    Replaying the model over the planted data must reproduce the state each
+    position was given — for every position in the world, not only the faults.
+    A planted state the classifier cannot derive is a state the product never
+    actually reaches, however the data is labelled.
+    """
+    sim = Simulator(seed=11, outlets=8)
+    world = sim.world()
+    for outlet_id, state in world.items():
+        for pid, pos in state.positions.items():
+            drift = pos.balance - _reconciled(state, pid)
+            derived = classify_feed(pos.last_feed_at, sim.now, drift)
+            assert derived is pos.feed_status, (
+                f"{outlet_id}/{pid} is labelled {pos.feed_status} but the model "
+                f"derives {derived}")
+
+
+def test_a_delayed_feed_sits_inside_the_delayed_band():
+    """Late, but not stale — the rung exists only between the two thresholds."""
+    sim = Simulator(seed=11, outlets=8)
+    world = sim.world()
+    delayed = [pos for state in world.values()
+               for pos in state.positions.values()
+               if pos.feed_status is FeedStatus.DELAYED]
+    assert len(delayed) == 1
+    age = sim.now - delayed[0].last_feed_at
+    assert DELAYED_AFTER_S < age < STALE_AFTER_S, (
+        f"a delayed feed must be older than {DELAYED_AFTER_S}s and younger "
+        f"than {STALE_AFTER_S}s, got {age}s")
+
+
+def test_a_missing_feed_has_no_timestamp_at_all():
+    """Missing is read off the absence of a feed, so it must have none.
+
+    An old-but-present stamp would classify as stale and quietly demonstrate
+    the wrong rung of the ladder.
+    """
+    sim = Simulator(seed=11, outlets=8)
+    world = sim.world()
+    missing = [pos for state in world.values()
+               for pos in state.positions.values()
+               if pos.feed_status is FeedStatus.MISSING]
+    assert len(missing) == 1
+    assert missing[0].last_feed_at is None
+    assert classify_feed(None, sim.now, 0.0) is FeedStatus.MISSING

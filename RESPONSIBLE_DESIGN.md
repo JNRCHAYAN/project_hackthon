@@ -86,15 +86,23 @@ first-class engineering problem rather than a disclaimer.
 ## Uncertainty and degraded data
 
 A degraded feed must never silently produce a confident conclusion. Feed health
-propagates into every downstream confidence figure:
+propagates into every downstream confidence figure. Every row below is reachable
+in the shipped demo world, and the last column names where each is planted — so a
+reviewer can go and look at it rather than take the table's word for it:
 
-| Feed status | Confidence multiplier | Condition |
-|---|---:|---|
-| `fresh` | 1.00 | feed updated within 5 minutes |
-| `delayed` | 0.80 | last update 5–30 minutes old |
-| `stale` | 0.50 | last update more than 30 minutes old |
-| `conflicting` | 0.30 | declared balance disagrees with the reconciled chain |
-| `missing` | 0.00 | no feed at all |
+| Feed status | Confidence multiplier | Condition | Planted at (12-outlet demo, seed 42) |
+|---|---:|---|---|
+| `fresh` | 1.00 | feed updated within 5 minutes | every other position — 32 of the 36 |
+| `delayed` | 0.80 | last update 5–30 minutes old | `AG-1005` / rocket, 17.5 min |
+| `stale` | 0.50 | last update more than 30 minutes old | `AG-1004` / nagad, 45 min |
+| `conflicting` | 0.30 | declared balance disagrees with the reconciled chain | `AG-1003` / bKash (the Scenario C drift) |
+| `missing` | 0.00 | no feed at all | `AG-1006` / bKash (timestamp absent) |
+
+Each degraded feed sits on its own outlet, which leaves that outlet's other two
+providers as honest evidence to read it against — one bad feed does not make the
+whole outlet unreadable. A test asserts that one ordinary world reaches all five
+states and that replaying the classifier over the planted data reproduces each
+one, so the table above cannot drift from the code.
 
 **Withdrawal rule.** When a feed is `conflicting` or `missing`, the liquidity
 projection is **suppressed entirely**. No recommendation is offered, because

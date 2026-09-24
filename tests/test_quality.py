@@ -10,9 +10,9 @@ from app.domain import (
     FeedStatus, Outlet, OutletState, ProviderPosition, Transaction, TxnType,
 )
 from app.quality import (
-    CONFIDENCE_MULTIPLIER, DELAYED_AFTER_S, STALE_AFTER_S, SUPPRESSION_NOTICE,
-    SUPPRESSION_NOTICE_BN, classify_feed, outlet_reliability, reconcile,
-    should_suppress,
+    CONFIDENCE_MULTIPLIER, DELAYED_AFTER_S, MIN_RELIABILITY, STALE_AFTER_S,
+    SUPPRESSION_NOTICE, SUPPRESSION_NOTICE_BN, classify_feed,
+    outlet_reliability, reconcile, should_suppress,
 )
 
 FORBIDDEN_VOCABULARY = (
@@ -65,6 +65,17 @@ def test_multiplier_covers_every_feed_status():
 
 def test_fresh_is_the_identity_multiplier():
     assert CONFIDENCE_MULTIPLIER[FeedStatus.FRESH] == 1.0
+
+
+def test_every_state_carries_the_documented_multiplier():
+    """The published ladder itself, not merely its ordering."""
+    assert CONFIDENCE_MULTIPLIER == {
+        FeedStatus.FRESH: 1.0,
+        FeedStatus.DELAYED: 0.8,
+        FeedStatus.STALE: 0.5,
+        FeedStatus.CONFLICTING: 0.3,
+        FeedStatus.MISSING: 0.0,
+    }
 
 
 # --- Reconcile --------------------------------------------------------------
@@ -236,3 +247,18 @@ def test_outlet_reliability_of_conflicting_feed_is_heavily_discounted():
     multiplier, notes = outlet_reliability(state, now)
     assert multiplier <= 0.3
     assert any("verify feed" in note for note in notes)
+
+
+@pytest.mark.parametrize("status", list(FeedStatus))
+def test_one_degraded_feed_costs_exactly_its_documented_multiplier(status):
+    """Every rung of the ladder, propagated through the outlet rollup.
+
+    The rollup is where the multiplier stops being a table entry and starts
+    being the number the dashboard prints, so each state is checked there too.
+    """
+    now = 1_000_000.0
+    stamped = None if status is FeedStatus.MISSING else now - 600
+    state = _state([_position("nagad", status, stamped)])
+    multiplier, _ = outlet_reliability(state, now)
+    assert multiplier == pytest.approx(
+        max(MIN_RELIABILITY, CONFIDENCE_MULTIPLIER[status]))

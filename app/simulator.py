@@ -44,6 +44,7 @@ from app.domain import (
     FeedStatus, Outlet, OutletState, Provider, ProviderPosition,
     Transaction, TxnType,
 )
+from app.quality import DELAYED_AFTER_S, STALE_AFTER_S
 
 PROVIDERS = [
     Provider(id="bkash", name="bKash", name_bn="বিকাশ"),
@@ -81,8 +82,15 @@ CASH_FLOOR = 42_000.0
 
 # --- Scenario C: the deliberate break --------------------------------------
 C_DRIFT = 25_000.0
-# --- Feed fault ------------------------------------------------------------
+# --- Feed faults ------------------------------------------------------------
 STALE_FEED_AGE = 45 * MINUTE
+# The age that lands a planted feed squarely in the *delayed* band. Derived
+# from the model's own thresholds rather than written down, because a literal
+# here would silently stop demonstrating anything the moment either threshold
+# is retuned. The midpoint is strictly inside the band for any ordered pair of
+# thresholds, and never sits on a boundary where an exclusive comparison would
+# flip it to the neighbouring rung.
+DELAYED_FEED_AGE = (DELAYED_AFTER_S + STALE_AFTER_S) / 2
 
 BURST_AMOUNT = 9_900.0           # Scenario B's "near-identical" size
 BURST_ACCOUNTS = 4               # <= SETTINGS["burst_max_accounts"]
@@ -284,11 +292,31 @@ class Simulator:
                       f"{C_DRIFT:,.0f}; declared total value now "
                       f"{state.total_value():,.0f}")))
 
-        # Feed faults: stale feed on one outlet.
+        # Feed faults: the other three degraded feeds, each on its own outlet
+        # and its own provider — stale, delayed, then absent entirely. No
+        # episode is recorded for any of them: ground truth describes planted
+        # *activity*, and a feed that never arrived is not something a detector
+        # can find or miss. One fault per outlet also leaves that outlet's
+        # other two positions as fresh evidence rather than collateral damage.
         if len(ids) > 4:
             pos = world[ids[4]].positions["nagad"]
             pos.feed_status = FeedStatus.STALE
             pos.last_feed_at = self.now - STALE_FEED_AGE
+
+        if len(ids) > 5:
+            pos = world[ids[5]].positions["rocket"]
+            pos.feed_status = FeedStatus.DELAYED
+            pos.last_feed_at = self.now - DELAYED_FEED_AGE
+
+        # Missing is the one state with no timestamp at all: classify_feed
+        # tests ``last_feed_at is None`` *before* it looks at lag or drift, so
+        # the plant has to clear the timestamp rather than age it. An old but
+        # present stamp would classify as stale and demonstrate a different
+        # rung of the ladder.
+        if len(ids) > 6:
+            pos = world[ids[6]].positions["bkash"]
+            pos.feed_status = FeedStatus.MISSING
+            pos.last_feed_at = None
 
     def _scenario_a(self, world: dict[str, OutletState], o: str) -> None:
         """Drain one provider dry, leaving the shared drawer healthy."""

@@ -470,3 +470,39 @@ def test_withdrawn_projection_is_not_scored_as_a_detection(client):
 
     # The alert is still shown to the user — it is useful, just not a detection.
     assert all(a["kind"] == "data_quality" for a in withdrawn)
+
+
+def test_case_status_survives_a_process_restart(tmp_path):
+    """A new Engine over the same audit database recovers what was decided.
+
+    This is the sibling of the rebuild case: a restart used to keep the audit
+    trail and reset every case to NEW, so the ledger and the case list told
+    different stories about the same case.
+    """
+    db = tmp_path / "audit.sqlite"
+
+    first = Engine(seed=42, outlets=12, use_llm=False, db_path=db)
+    alert_id = next(a.id for a in first.alerts.values()
+                    if a.status.value == "new" and a.provider_id)
+    provider = first.alerts[alert_id].provider_id
+    first.act(alert_id, "acknowledge", "ops", actor_provider=provider)
+    assert first.alerts[alert_id].status.value == "acknowledged"
+
+    second = Engine(seed=42, outlets=12, use_llm=False, db_path=db)
+    assert second.alerts[alert_id].status.value == "acknowledged", (
+        "the audit trail said acknowledged; the recovered case disagreed")
+
+
+def test_a_note_does_not_count_as_a_status_change(tmp_path):
+    """Recovery reads status-changing events only — a note leaves the case put."""
+    db = tmp_path / "audit.sqlite"
+    first = Engine(seed=42, outlets=12, use_llm=False, db_path=db)
+    alert_id = next(a.id for a in first.alerts.values()
+                    if a.status.value == "new" and a.provider_id)
+    provider = first.alerts[alert_id].provider_id
+    first.act(alert_id, "acknowledge", "ops", actor_provider=provider)
+    first.act(alert_id, "note", "ops", note="called the outlet",
+              actor_provider=provider)
+
+    second = Engine(seed=42, outlets=12, use_llm=False, db_path=db)
+    assert second.alerts[alert_id].status.value == "acknowledged"
